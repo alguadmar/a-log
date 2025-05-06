@@ -18,7 +18,7 @@ import rehypeDocument from 'rehype-document'
 import { pluginCollapsibleSections } from '@expressive-code/plugin-collapsible-sections'
 import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers'
 
-import tailwindcss from '@tailwindcss/vite'
+import tailwindcss from '@astrojs/tailwind'
 
 export default defineConfig({
   site: 'https://astro-erudite.vercel.app',
@@ -70,6 +70,7 @@ export default defineConfig({
     react(),
     sitemap(),
     icon(),
+    tailwindcss(),
   ],
   vite: {
     plugins: [tailwindcss()],

@@ -4,7 +4,8 @@ import ThemeToggle from '@/components/ThemeToggle.astro'
 import MobileMenu from '@/components/ui/mobile-menu'
 import { NAV_LINKS, SITE } from '@/consts'
 import { Image } from 'astro:assets'
-import logo from '../../public/static/logo.svg'
+import logo from '../../public/static/log.png'
+import logo_dark from '../../public/static/log-dark.png'
 ---
 
 <header
@@ -14,12 +15,14 @@ import logo from '../../public/static/logo.svg'
   <div
     class="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-4 p-4"
   >
-    <Link href="/" class="flex shrink-0 items-center gap-2 text-xl font-medium">
-      <Image src={logo} alt="Logo" class="size-8" />
-      {SITE.title}
+    <Link href="/" class="flex shrink-0 items-center gap-2 text-xl font-medium relative">
+      <div class="size-10 overflow-hidden">
+        <Image src={logo} alt="Logo" class="size-10 absolute inset-0 dark:hidden" />
+        <Image src={logo_dark} alt="Logo darkmode" class="size-10 absolute inset-0 hidden dark:block" />
+      </div>
     </Link>
     <div class="flex items-center gap-2 md:gap-4">
-      <nav class="hidden items-center gap-4 text-sm sm:gap-6 md:flex">
+      <nav class="hidden items-center gap-4 text-sm  sm:gap-6 md:flex">
         {
           NAV_LINKS.map((item) => (
             <Link

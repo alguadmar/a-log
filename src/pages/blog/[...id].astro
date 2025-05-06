@@ -25,119 +25,106 @@ export async function getStaticPaths() {
 const post = Astro.props
 const currentPostId = Astro.params.id
 const { Content, headings } = await render(post)
-const { next, prev } = await getAdjacentPosts(currentPostId)
+const { next: nextPost, prev: prevPost } = await getAdjacentPosts(currentPostId)
 const authors = await parseAuthors(post.data.authors ?? [])
+const readTimeText = readingTime(post.body!)
 ---
 
 <Layout isWide>
   <PostHead slot="head" post={post} />
-  <section
-    class="grid grid-cols-[minmax(0px,1fr)_min(calc(var(--breakpoint-md)-2rem),100%)_minmax(0px,1fr)] gap-y-6"
-  >
-    <div class="col-start-2">
-      <Breadcrumbs
-        items={[
-          { href: '/blog', label: 'Blog', icon: 'lucide:archive' },
-          { label: post.data.title, icon: 'lucide:file-text' },
-        ]}
-      />
-    </div>
-    {
-      post.data.image && (
+
+  <section class="grid grid-cols-[minmax(0px,1fr)_min(768px,100%)_minmax(0px,1fr)] gap-y-6 *:px-4">
+    <Breadcrumbs
+      items={[{ href: '/blog', label: 'Blog', icon: 'lucide:archive' }, { label: post.data.title, icon: 'lucide:file-text' }]}
+      class="col-start-2!"
+    />
+
+    {post.data.image && (
+      <div class="col-span-full mx-auto w-full max-w-[1000px]">
         <Image
           src={post.data.image}
           alt={post.data.title}
           width={1200}
           height={630}
-          class="col-span-full mx-auto w-full max-w-5xl object-cover"
+          class="rounded-xl object-cover"
         />
-      )
-    }
-    <section class="col-start-2 flex flex-col gap-y-6 text-center">
-      <div class="flex flex-col">
-        <h1
-          class="mb-2 text-4xl leading-tight font-medium text-pretty sm:text-5xl"
-        >
-          {post.data.title}
-        </h1>
+      </div>
+    )}
 
-        <div
-          class="text-muted-foreground mb-4 flex flex-wrap items-center justify-center gap-2 text-sm"
-        >
-          {
-            authors.length > 0 && (
-              <>
-                <div class="flex items-center gap-x-2">
-                  {authors.map((author) => (
-                    <div class="flex items-center gap-x-1.5">
-                      <Image
-                        src={author.avatar}
-                        alt={author.name}
-                        width={24}
-                        height={24}
-                        class="rounded-full"
-                      />
-                      {author.isRegistered ? (
-                        <Link
-                          href={`/authors/${author.id}`}
-                          underline
-                          class="text-foreground"
-                        >
-                          <span>{author.name}</span>
-                        </Link>
-                      ) : (
-                        <span>{author.name}</span>
-                      )}
-                    </div>
-                  ))}
+    <section class="col-start-2 flex flex-col gap-y-6 text-center">
+      <h1 class="text-pretty text-3xl font-bold tracking-tight sm:text-4xl">
+        {post.data.title}
+      </h1>
+
+      <div class="flex flex-wrap items-center justify-center gap-2 text-sm text-muted-foreground">
+        {authors.length > 0 && (
+          <>
+            <div class="flex items-center gap-x-2">
+              {authors.map((author) => (
+                <div class="flex items-center gap-x-1.5">
+                  <Image
+                    src={author.avatar}
+                    alt={author.name}
+                    width={24}
+                    height={24}
+                    class="rounded-full"
+                  />
+                  {author.isRegistered ? (
+                    <Link href={`/authors/${author.id}`} underline class="text-foreground">
+                      <span>{author.name}</span>
+                    </Link>
+                  ) : (
+                    <span>{author.name}</span>
+                  )}
                 </div>
-                <Separator orientation="vertical" className="h-4!" />
-              </>
-            )
-          }
-          <div class="flex items-center gap-2">
-            <span>{formatDate(post.data.date)}</span>
-            <Separator orientation="vertical" className="h-4!" />
-            <span>{readingTime(post.body!)}</span>
-          </div>
-        </div>
-        <div class="flex flex-wrap justify-center gap-2">
-          {
-            post.data.tags && post.data.tags.length > 0 ? (
-              post.data.tags.map((tag) => (
-                <a
-                  href={`/tags/${tag}`}
-                  class={badgeVariants({ variant: 'secondary' })}
-                >
-                  <Icon name="lucide:hash" class="size-3" />
-                  {tag}
-                </a>
-              ))
-            ) : (
-              <span class="text-muted-foreground text-sm">
-                No tags available
-              </span>
-            )
-          }
-        </div>
+              ))}
+            </div>
+            <Separator orientation="vertical" className="h-4" />
+          </>
+        )}
+        <span>{formatDate(post.data.date)}</span>
+        <Separator orientation="vertical" className="h-4" />
+        <span>{readTimeText}</span>
       </div>
 
-      <PostNavigation prevPost={prev} nextPost={next} />
+      <div class="flex flex-wrap justify-center gap-2">
+        {post.data.tags?.length > 0 ? (
+          post.data.tags.map((tag) => (
+            <a href={`/tags/${tag}`} class={badgeVariants({ variant: 'secondary' })}>
+              <Icon name="lucide:hash" class="size-3 -translate-x-0.5" />
+              {tag}
+            </a>
+          ))
+        ) : (
+          <span class="text-sm text-muted-foreground">No tags available</span>
+        )}
+      </div>
+
+      <PostNavigation prevPost={prevPost} nextPost={nextPost} />
+
+      {headings.length > 0 && (
+        <div class=" block w-full lg:hidden">
+          <TableOfContents headings={headings} enableScrollSpy />
+        </div>
+      )}
     </section>
 
-    {headings.length > 0 && <TableOfContents headings={headings} />}
+    {headings.length > 0 && (
+      <aside class="sticky top-[6.5rem] hidden lg:block col-start-1 self-start pr-2">
+        <TableOfContents headings={headings} enableScrollSpy />
+      </aside>
+    )}
 
-    <article class="prose col-start-2 max-w-none">
+    <article class="prose col-start-2 max-w-none prose-invert">
       <Content />
+      <PostNavigation prevPost={prevPost} nextPost={nextPost} />
     </article>
-
-    <PostNavigation prevPost={prev} nextPost={next} />
   </section>
 
   <Button
     variant="outline"
     size="icon"
-    className="group fixed right-8 bottom-8 z-50 hidden"
+    className="group fixed bottom-8 right-8 z-50 hidden"
     id="scroll-to-top"
     title="Scroll to top"
     aria-label="Scroll to top"

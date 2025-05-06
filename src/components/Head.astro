@@ -5,6 +5,44 @@ import Favicons from './Favicons.astro'
 ---
 
 <head>
+  <!-- Preload script to prevent flash of incorrect theme -->
+  <script is:inline>
+    // Theme detection and immediate application - using IIFE to avoid global variables
+    (function() {
+      const themeValue = localStorage?.getItem('theme') || '';
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = themeValue === 'dark' || (!themeValue && prefersDark);
+      
+      // Apply theme immediately to prevent flash
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+        // Add this style tag to prevent icons from flashing
+        document.head.insertAdjacentHTML('beforeend', 
+          `<style id="theme-icons-fix">
+            /* Theme toggle icons fix */
+            :root.dark [data-icon="lucide:sun"] { opacity: 0 !important; transform: scale(0) rotate(-90deg) !important; }
+            :root.dark [data-icon="lucide:moon"] { opacity: 1 !important; transform: scale(1) rotate(0) !important; }
+            
+            /* Logo and other dark mode elements */
+            :root.dark .dark\\:hidden { display: none !important; }
+            :root.dark .hidden.dark\\:block { display: block !important; }
+            
+            /* Ensure immediate application of icon classes */
+            :root.dark img[class*="dark:hidden"] { display: none !important; }
+            :root.dark img[class*="hidden"][class*="dark:block"] { display: block !important; }
+          </style>`);
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      
+      // Remove the unset class to apply proper transitions
+      document.documentElement.classList.remove('color-scheme-unset');
+      
+      // Set background color immediately to prevent flash
+      document.documentElement.style.backgroundColor = isDark ? '#09090b' : '#ffffff';
+    })();
+  </script>
+
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta
@@ -25,12 +63,12 @@ import Favicons from './Favicons.astro'
 
   <meta
     name="theme-color"
-    content="#121212"
+    content="#09090b"
     media="(prefers-color-scheme: dark)"
   />
   <meta
     name="theme-color"
-    content="#121212"
+    content="#ffffff"
     media="(prefers-color-scheme: light)"
   />
 

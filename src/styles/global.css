@@ -1,110 +1,239 @@
-@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@custom-variant dark (&:is(.dark *));
-
-@theme inline {
-  --font-sans:
-    Geist, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
-    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  --font-mono:
-    Geist Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    'Liberation Mono', 'Courier New', monospace;
-
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-
-  --color-additive: var(--additive);
-  --color-additive-foreground: var(--additive-foreground);
-
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-
-  --color-border: var(--border);
-  --color-ring: var(--ring);
-}
-
-@font-face {
-  font-family: 'Geist';
-  src: url('/fonts/GeistVF.woff2') format('woff2-variations');
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Geist Mono';
-  src: url('/fonts/GeistMonoVF.woff2') format('woff2-variations');
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-
+/* Add transition for background and text colors */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --transition-duration: 0.2s;
+}
+
+/* JetBrains Mono */
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/JetBrainsMono[wght].woff2') format('woff2-variations');
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/JetBrainsMono-Italic[wght].woff2') format('woff2-variations');
+  font-weight: 100 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* Variables CSS */
+:root {
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 3.9%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --ring: 240 5% 64.9%;
+
+  --primary: 240 5.9% 10%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 240 4.8% 95.9%;
+  --secondary-foreground: 240 5.9% 10%;
+
+  --accent: 240 4.8% 95.9%;
+  --accent-foreground: 240 5.9% 10%;
+
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 100%;
+
+  --radius: 0.5rem;
+
+  --font-sans: 'JetBrains Mono', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --ring: oklch(0.556 0 0);
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 240 4.9% 83.9%;
+
+  --primary: 0 0% 98%;
+  --primary-foreground: 240 5.9% 10%;
+
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
 }
 
 @layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    @apply border-border outline-ring/50 tracking-tight;
-  }
-
   html {
-    @apply bg-background text-foreground scheme-light;
+    @apply bg-background text-foreground font-sans;
+    /* Add color-scheme to properly handle system colors */
+    color-scheme: light dark;
+  }
 
-    &.dark {
-      @apply scheme-dark;
+  html.disable-transitions,
+  html.color-scheme-unset,
+  html.color-scheme-unset * {
+    transition: none !important;
+  }
+
+  *,
+  ::before,
+  ::after {
+    @apply border-border outline-ring/50 tracking-tight;
+    transition: background-color var(--transition-duration) ease-in-out, 
+                border-color var(--transition-duration) ease-in-out,
+                color var(--transition-duration) ease-in-out;
+  }
+}
+
+@layer components {
+  .prose {
+    @apply text-foreground text-sm leading-7;
+
+    p {
+      @apply text-foreground/80 my-5;
     }
 
-    ::-webkit-scrollbar-corner {
-      @apply bg-transparent;
+    h1 {
+      @apply text-foreground mb-6 scroll-m-20 text-4xl leading-5 font-medium;
+    }
+
+    h2 {
+      @apply text-foreground mt-8 mb-4 scroll-m-20 text-2xl leading-5 font-medium;
+    }
+
+    h3 {
+      @apply text-foreground mt-6 mb-4 scroll-m-20 text-xl leading-6 font-medium;
+    }
+
+    h4 {
+      @apply text-foreground mt-6 mb-3 scroll-m-20 text-lg leading-6 font-medium;
+    }
+
+    h5 {
+      @apply text-foreground mt-5 mb-3 scroll-m-20 leading-6 font-medium;
+    }
+
+    h6 {
+      @apply text-foreground mt-5 mb-3 scroll-m-20 leading-6 font-medium;
+    }
+
+    a {
+      @apply text-foreground decoration-muted-foreground hover:decoration-foreground font-medium break-words underline underline-offset-[3px] transition-colors;
+    }
+
+    strong {
+      @apply text-foreground font-medium;
+    }
+
+    ul {
+      @apply marker:text-foreground/30 my-5 ml-6 list-disc [&>li]:mt-2;
+    }
+
+    ol {
+      @apply marker:text-foreground/30 my-5 ml-6 list-decimal [&>li]:mt-2;
+      @apply [&[type='A']]:list-[upper-alpha] [&[type='I']]:list-[upper-roman] [&[type='a']]:list-[lower-alpha] [&[type='i']]:list-[lower-roman];
+    }
+
+    li {
+      @apply text-foreground/80 pl-2 [&>p]:my-0;
+    }
+
+    ul ul,
+    ol ol,
+    ul ol,
+    ol ul {
+      @apply marker:text-foreground/30 my-2 ml-6;
+    }
+
+    code {
+      @apply bg-muted/50 text-foreground relative rounded-sm px-[0.3rem] py-[0.2rem] text-sm font-medium break-words;
+      @apply [&>span[data-line='']>*]:text-[--shiki-light] dark:[&>span[data-line='']>*]:text-[--shiki-dark];
+    }
+
+    blockquote {
+      @apply [&_*]:text-muted-foreground small my-6 border-l-2 pl-6;
+    }
+
+    hr {
+      @apply border-border my-8 border-t;
+    }
+
+    table {
+      @apply my-6 block w-full overflow-x-auto text-sm;
+    }
+
+    thead {
+      @apply border-muted-foreground/30 border-b;
+    }
+
+    th {
+      @apply px-4 py-2 font-medium;
+      @apply text-left [&[align=center]]:text-center [&[align=right]]:text-right;
+    }
+
+    tr {
+      @apply border-muted-foreground/30 border-y first:border-t-0 last:border-b-0;
+    }
+
+    td {
+      @apply fix-margin text-foreground/80 small px-4 py-2 align-top break-words;
+      @apply text-left [&[align=center]]:text-center [&[align=right]]:text-right;
+    }
+
+    img,
+    video,
+    figure,
+    .expressive-code {
+      @apply my-6 max-w-full h-auto rounded-md;
+    }
+
+    summary {
+      @apply [&~*]:small [&~*]:fix-margin;
+    }
+
+    kbd {
+      @apply text-foreground bg-muted border-border rounded-md border px-2 py-1 text-xs font-medium;
+    }
+
+    .katex-display {
+      @apply text-foreground/80 my-6 overflow-x-auto overflow-y-hidden py-2 tracking-normal;
     }
   }
 
-  .disable-transitions * {
-    @apply transition-none!;
+  .fix-margin {
+    @apply [&>*]:first:mt-0 [&>*]:last:mb-0;
   }
+
+  .small {
+    @apply text-sm leading-6;
+  }
+
 }

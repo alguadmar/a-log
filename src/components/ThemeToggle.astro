@@ -6,34 +6,45 @@ import { Icon } from 'astro-icon/components'
 <Button id="theme-toggle" variant="outline" size="icon" title="Toggle theme">
   <Icon
     name="lucide:sun"
-    class="size-4 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
+    class="size-4 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90 theme-icon"
   />
   <Icon
     name="lucide:moon"
-    class="absolute size-4 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0"
+    class="absolute size-4 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0 theme-icon"
   />
   <span class="sr-only">Toggle theme</span>
 </Button>
 
-<script is:inline data-astro-rerun>
-  const theme = (() => {
-    const localStorageTheme = localStorage?.getItem('theme') ?? ''
-    if (['dark', 'light'].includes(localStorageTheme)) {
-      return localStorageTheme
-    }
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark'
-    }
-    return 'light'
-  })()
-
-  if (theme === 'light') {
-    document.documentElement.classList.remove('dark')
-  } else {
-    document.documentElement.classList.add('dark')
+<style>
+  /* Additional styles to prevent icon flash */
+  :global(.dark) .theme-icon[data-icon="lucide:sun"] {
+    transform: scale(0) rotate(-90deg);
   }
+  
+  :global(.dark) .theme-icon[data-icon="lucide:moon"] {
+    transform: scale(1) rotate(0);
+  }
+</style>
 
-  window.localStorage.setItem('theme', theme)
+<script is:inline data-astro-rerun>
+  // Now we can optimize this script since the initial theme is 
+  // already set in the <head> preload script
+  // Using IIFE to avoid global variables
+  (function() {
+    const currentTheme = (() => {
+      const localStorageTheme = localStorage?.getItem('theme') ?? ''
+      if (['dark', 'light'].includes(localStorageTheme)) {
+        return localStorageTheme
+      }
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark'
+      }
+      return 'light'
+    })()
+
+    // Store the theme in localStorage for persistence
+    window.localStorage.setItem('theme', currentTheme)
+  })();
 </script>
 
 <script>
@@ -63,23 +74,51 @@ import { Icon } from 'astro-icon/components'
   initThemeToggle()
 
   document.addEventListener('astro:after-swap', () => {
-    const storedTheme = localStorage.getItem('theme')
-    const element = document.documentElement
+    // Using closure to avoid potential variable conflicts
+    (function() {
+      const storedTheme = localStorage.getItem('theme')
+      const element = document.documentElement
 
-    element.classList.add('disable-transitions')
+      element.classList.add('disable-transitions')
 
-    window.getComputedStyle(element).getPropertyValue('opacity')
+      window.getComputedStyle(element).getPropertyValue('opacity')
 
-    if (storedTheme === 'dark') {
-      element.classList.add('dark')
-    } else {
-      element.classList.remove('dark')
-    }
+      if (storedTheme === 'dark') {
+        element.classList.add('dark')
+        
+        // Fix icon display after navigation
+        const iconFix = document.getElementById('theme-icons-fix');
+        if (!iconFix) {
+          document.head.insertAdjacentHTML('beforeend', 
+            `<style id="theme-icons-fix">
+              /* Theme toggle icons fix */
+              :root.dark [data-icon="lucide:sun"] { opacity: 0 !important; transform: scale(0) rotate(-90deg) !important; }
+              :root.dark [data-icon="lucide:moon"] { opacity: 1 !important; transform: scale(1) rotate(0) !important; }
+              
+              /* Logo and other dark mode elements */
+              :root.dark .dark\\:hidden { display: none !important; }
+              :root.dark .hidden.dark\\:block { display: block !important; }
+              
+              /* Ensure immediate application of icon classes */
+              :root.dark img[class*="dark:hidden"] { display: none !important; }
+              :root.dark img[class*="hidden"][class*="dark:block"] { display: block !important; }
+            </style>`);
+        }
+      } else {
+        element.classList.remove('dark')
+        // Remove icon fix if exists
+        const iconFix = document.getElementById('theme-icons-fix');
+        if (iconFix) {
+          iconFix.remove();
+        }
+      }
 
-    requestAnimationFrame(() => {
-      element.classList.remove('disable-transitions')
-    })
+      requestAnimationFrame(() => {
+        element.classList.remove('disable-transitions')
+      })
+    })();
 
+    // Initialize theme toggle button
     initThemeToggle()
   })
 </script>
