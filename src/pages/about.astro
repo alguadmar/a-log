@@ -2,20 +2,18 @@
 import Breadcrumbs from '@/components/Breadcrumbs.astro'
 import Link from '@/components/Link.astro'
 import PageHead from '@/components/PageHead.astro'
-import ProjectCard from '@/components/ProjectCard.astro'
 import Layout from '@/layouts/Layout.astro'
-import { getAllProjects } from '@/lib/data-utils'
-
-const projects = await getAllProjects()
 ---
 
 <Layout>
-  <PageHead slot="head" title="About" />
-  <Breadcrumbs items={[{ label: 'About', icon: 'lucide:info' }]} />
+  <PageHead slot="head" title="Manifiesto" />
+  <Breadcrumbs items={[{ label: 'Manifiesto', icon: 'lucide:info' }]} />
 
   <section>
     <div class="min-w-full">
-      <div class="prose mb-8">
+      <div class="prose">
+        <h1 class="text-3xl font-bold mb-6">Manifiesto</h1>
+        
         <p class="mb-4">
           a-log es un blog personal desarrollado con <Link
             href="https://astro.build"
@@ -34,7 +32,8 @@ const projects = await getAllProjects()
             underline>shadcn/ui</Link
           >. Funciona como un archivo de pensamiento libre y una bitácora de aprendizaje.
         </p>
-        <p>
+        
+        <p class="mb-6">
           Para conocer más sobre la filosofía detrás de este proyecto, puedes consultar
           el siguiente post: <Link
             href="/blog/the-state-of-static-blogs"
@@ -42,11 +41,32 @@ const projects = await getAllProjects()
             underline>El estado de los blogs estáticos en 2024</Link
           >.
         </p>
-      </div>
-
-      <h2 class="mb-4 text-2xl font-medium">Proyectos Destacados</h2>
-      <div class="flex flex-col gap-6">
-        {projects.map((project) => <ProjectCard project={project} />)}
+        
+        <h2 class="text-2xl font-medium mt-8 mb-4">Mi Historia</h2>
+        <p class="mb-4">
+          ¡Hola! Soy un desarrollador web apasionado por la tecnología y el aprendizaje continuo. 
+          Desde que me interesé por la programación, he estado explorando diferentes tecnologías 
+          y compartiendo mis experiencias a través de este blog.
+        </p>
+        
+        <p class="mb-4">
+          Este espacio es mi laboratorio personal donde documento mi viaje por el mundo del desarrollo web, 
+          desde la experimentación con nuevas tecnologías hasta reflexiones sobre buenas prácticas y soluciones 
+          a problemas comunes.
+        </p>
+        
+        <h2 class="text-2xl font-medium mt-8 mb-4">¿Qué encontrarás aquí?</h2>
+        <ul class="list-disc pl-6 space-y-2 mb-6">
+          <li>Tutoriales y guías sobre desarrollo web</li>
+          <li>Análisis de tecnologías emergentes</li>
+          <li>Proyectos personales documentados paso a paso</li>
+          <li>Reflexiones sobre el proceso de aprendizaje y crecimiento profesional</li>
+        </ul>
+        
+        <p class="mt-8">
+          Si quieres conocer los proyectos en los que estoy trabajando actualmente, puedes visitar la 
+          sección de <Link href="/projects" class="text-foreground" underline>proyectos</Link>.
+        </p>
       </div>
     </div>
   </section>

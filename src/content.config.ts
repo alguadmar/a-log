@@ -39,7 +39,8 @@ const projects = defineCollection({
       description: z.string(),
       tags: z.array(z.string()),
       image: z.string().optional(),
-      link: z.string().url(),
+      link: z.string().url().optional(), // Ahora opcional para permitir proyectos sin enlace externo
+      relatedPosts: z.array(z.string()).optional(), // IDs de los posts relacionados
       startDate: z.coerce.date().optional(),
       endDate: z.coerce.date().optional(),
     }),

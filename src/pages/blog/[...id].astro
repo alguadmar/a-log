@@ -2,13 +2,14 @@
 import Breadcrumbs from '@/components/Breadcrumbs.astro'
 import Link from '@/components/Link.astro'
 import PostHead from '@/components/PostHead.astro'
+import ProjectLink from '@/components/ProjectLink.astro'
 import PostNavigation from '@/components/PostNavigation.astro'
 import TableOfContents from '@/components/TableOfContents.astro'
 import { badgeVariants } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import Layout from '@/layouts/Layout.astro'
-import { getAdjacentPosts, getAllPosts, parseAuthors } from '@/lib/data-utils'
+import { getAdjacentPosts, getAllPosts, parseAuthors, getProjectForPost } from '@/lib/data-utils'
 import { formatDate, readingTime } from '@/lib/utils'
 import { Icon } from 'astro-icon/components'
 import { Image } from 'astro:assets'
@@ -25,7 +26,13 @@ export async function getStaticPaths() {
 const post = Astro.props
 const currentPostId = Astro.params.id
 const { Content, headings } = await render(post)
+
+// Verificar si este post pertenece a algún proyecto (para mostrar enlace)
+const { project: associatedProject } = await getProjectForPost(currentPostId)
+
+// Navegación normal cronológica entre todos los posts del blog
 const { next: nextPost, prev: prevPost } = await getAdjacentPosts(currentPostId)
+
 const authors = await parseAuthors(post.data.authors ?? [])
 const readTimeText = readingTime(post.body!)
 ---
@@ -35,7 +42,10 @@ const readTimeText = readingTime(post.body!)
 
   <section class="grid grid-cols-[minmax(0px,1fr)_min(768px,100%)_minmax(0px,1fr)] gap-y-6 *:px-4">
     <Breadcrumbs
-      items={[{ href: '/blog', label: 'Blog', icon: 'lucide:archive' }, { label: post.data.title, icon: 'lucide:file-text' }]}
+      items={[
+        { href: '/blog', label: 'Blog', icon: 'lucide:archive' },
+        { label: post.data.title, icon: 'lucide:file-text' }
+      ]}
       class="col-start-2!"
     />
 
@@ -85,6 +95,17 @@ const readTimeText = readingTime(post.body!)
         <span>{formatDate(post.data.date)}</span>
         <Separator orientation="vertical" className="h-4" />
         <span>{readTimeText}</span>
+        
+        {/* Enlace al proyecto si este post pertenece a uno */}
+        {associatedProject && (
+          <>
+            <Separator orientation="vertical" className="h-4" />
+            <div class="flex items-center gap-x-1.5 text-foreground">
+              <span>Parte de:</span>
+              <ProjectLink project={associatedProject} className="text-foreground" />
+            </div>
+          </>
+        )}
       </div>
 
       <div class="flex flex-wrap justify-center gap-2">

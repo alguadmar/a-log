@@ -4,12 +4,38 @@ import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Icon } from 'astro-icon/components'
 
-const { prevPost, nextPost } = Astro.props
+const { 
+  prevPost, 
+  nextPost, 
+  projectId,
+  urlPrefix = '/blog/',  // Por defecto enlaza a /blog/[id]
+  nextLabel = "Siguiente Post",
+  prevLabel = "Post Anterior",
+  nextEmptyText = '¡Post más reciente!',
+  prevEmptyText = '¡Último post!'
+} = Astro.props
+
+// Determinar las URLs basadas en el prefijo proporcionado
+const getPostUrl = (post) => {
+  if (!post) return '#';
+  
+  // Si estamos usando el prefijo /blog/ (por defecto)
+  if (urlPrefix === '/blog/') {
+    return `${urlPrefix}${post.id}`;
+  }
+  
+  // Para otras rutas (como /projects/[projectId]/posts/), extraer el último segmento del ID
+  const postSlug = post.id.split('/').pop();
+  return `${urlPrefix}${postSlug}`;
+}
+
+const nextUrl = getPostUrl(nextPost);
+const prevUrl = getPostUrl(prevPost);
 ---
 
 <nav class="col-start-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
   <Link
-    href={nextPost ? `/blog/${nextPost.id}` : '#'}
+    href={nextUrl}
     class={cn(
       buttonVariants({ variant: 'outline' }),
       'rounded-xl group flex items-center justify-start size-full',
@@ -22,14 +48,14 @@ const { prevPost, nextPost } = Astro.props
       class="mr-2 size-4 transition-transform group-hover:-translate-x-1"
     />
     <div class="flex flex-col items-start overflow-hidden text-wrap">
-      <span class="text-muted-foreground text-left text-xs">Next Post</span>
+      <span class="text-muted-foreground text-left text-xs">{nextLabel}</span>
       <span class="w-full text-left text-sm text-ellipsis">
-        {nextPost?.data.title || 'Latest post!'}
+        {nextPost?.data.title || nextEmptyText}
       </span>
     </div>
   </Link>
   <Link
-    href={prevPost ? `/blog/${prevPost.id}` : '#'}
+    href={prevUrl}
     class={cn(
       buttonVariants({ variant: 'outline' }),
       'rounded-xl group flex items-center justify-end size-full',
@@ -38,10 +64,10 @@ const { prevPost, nextPost } = Astro.props
     aria-disabled={!prevPost}
   >
     <div class="flex flex-col items-end overflow-hidden text-wrap">
-      <span class="text-muted-foreground text-right text-xs">Previous Post</span
+      <span class="text-muted-foreground text-right text-xs">{prevLabel}</span
       >
       <span class="w-full text-right text-sm text-ellipsis">
-        {prevPost?.data.title || 'Last post!'}
+        {prevPost?.data.title || prevEmptyText}
       </span>
     </div>
     <Icon

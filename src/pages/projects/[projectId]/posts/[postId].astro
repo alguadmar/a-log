@@ -1,0 +1,312 @@
+---
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import Link from '@/components/Link.astro'
+import PostHead from '@/components/PostHead.astro'
+import PostNavigation from '@/components/PostNavigation.astro'
+import TableOfContents from '@/components/TableOfContents.astro'
+import { badgeVariants } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import Layout from '@/layouts/Layout.astro'
+import { getAdjacentProjectPosts, getAllPosts, getAllProjects, getPostsByProject, parseAuthors } from '@/lib/data-utils'
+import { formatDate, readingTime } from '@/lib/utils'
+import { Icon } from 'astro-icon/components'
+import { Image } from 'astro:assets'
+import { getCollection, getEntry } from 'astro:content'
+import { render } from 'astro:content'
+
+export async function getStaticPaths() {
+  const projects = await getAllProjects()
+  
+  const paths = [];
+  
+  // Para cada proyecto, obtener sus posts relacionados y generar rutas
+  for (const project of projects) {
+    if (!project.data.relatedPosts || project.data.relatedPosts.length === 0) continue;
+    
+    const relatedPosts = await getPostsByProject(project.id);
+    
+    for (const post of relatedPosts) {
+      paths.push({
+        params: {
+          projectId: project.id,
+          postId: post.id.split('/').pop()
+        },
+        props: {
+          project,
+          postId: post.id
+        }
+      });
+    }
+  }
+  
+  return paths;
+}
+
+// Obtener el proyecto y post de los props
+const { project, postId } = Astro.props;
+const projectId = Astro.params.projectId;
+
+// Obtener el post completo
+const post = await getEntry('blog', postId);
+const { Content, headings } = await render(post);
+
+// Obtener posts relacionados al proyecto
+const relatedPosts = await getPostsByProject(projectId);
+
+// Obtener posts adyacentes dentro del proyecto
+const { next: nextPost, prev: prevPost } = await getAdjacentProjectPosts(projectId, postId);
+
+// Obtener autores y tiempo de lectura
+const authors = await parseAuthors(post.data.authors ?? []);
+const readTimeText = readingTime(post.body!);
+
+// Obtener índice del post en la serie
+const postIndex = relatedPosts.findIndex(p => p.id === postId);
+---
+
+<Layout isWide>
+  <PostHead slot="head" post={post} />
+
+  <section class="grid grid-cols-[minmax(0px,1fr)_min(768px,100%)_minmax(0px,1fr)] lg:grid-cols-[minmax(240px,1fr)_min(768px,calc(100%-480px))_minmax(240px,1fr)] gap-y-6 *:px-4">
+    <Breadcrumbs
+      items={[
+        { href: '/projects', label: 'Proyectos', icon: 'lucide:briefcase' },
+        { href: `/projects/${projectId}`, label: project.data.name, icon: 'lucide:folder' },
+        { label: post.data.title, icon: 'lucide:file-text' }
+      ]}
+      class="col-start-2 mx-auto w-full"
+    />
+
+    {post.data.image && (
+      <div class="col-start-2 mx-auto w-full max-w-[1000px]">
+        <Image
+          src={post.data.image}
+          alt={post.data.title}
+          width={1200}
+          height={630}
+          class="rounded-xl object-cover"
+        />
+      </div>
+    )}
+
+    <section class="col-start-2 flex flex-col gap-y-6 text-center">
+      <h1 class="text-pretty text-3xl font-bold tracking-tight sm:text-4xl">
+        {post.data.title}
+      </h1>
+
+      <div class="flex flex-wrap items-center justify-center gap-2 text-sm text-muted-foreground">
+        {authors.length > 0 && (
+          <>
+            <div class="flex items-center gap-x-2">
+              {authors.map((author) => (
+                <div class="flex items-center gap-x-1.5">
+                  <Image
+                    src={author.avatar}
+                    alt={author.name}
+                    width={24}
+                    height={24}
+                    class="rounded-full"
+                  />
+                  {author.isRegistered ? (
+                    <Link href={`/authors/${author.id}`} underline class="text-foreground">
+                      <span>{author.name}</span>
+                    </Link>
+                  ) : (
+                    <span>{author.name}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+            <Separator orientation="vertical" className="h-4" />
+          </>
+        )}
+        <span>{formatDate(post.data.date)}</span>
+        <Separator orientation="vertical" className="h-4" />
+        <span>{readTimeText}</span>
+        
+        {/* Indicador de progreso en la serie */}
+        {postIndex !== -1 && (
+          <>
+            <Separator orientation="vertical" className="h-4" />
+            <div class="flex items-center gap-x-1.5">
+              <Icon name="lucide:list-ordered" class="size-4" />
+              <span>{postIndex + 1} de {relatedPosts.length} en esta serie</span>
+            </div>
+          </>
+        )}
+      </div>
+
+      <div class="flex flex-wrap justify-center gap-2">
+        {post.data.tags?.length > 0 ? (
+          post.data.tags.map((tag) => (
+            <a href={`/tags/${tag}`} class={badgeVariants({ variant: 'secondary' })}>
+              <Icon name="lucide:hash" class="size-3 -translate-x-0.5" />
+              {tag}
+            </a>
+          ))
+        ) : (
+          <span class="text-sm text-muted-foreground">No tags available</span>
+        )}
+      </div>
+
+      {/* Navegación entre posts del proyecto */}
+      <div class="w-full">
+        <PostNavigation 
+          prevPost={prevPost} 
+          nextPost={nextPost} 
+          urlPrefix={`/projects/${projectId}/posts/`}
+          prevLabel="Siguiente en este proyecto"
+          nextLabel="Anterior en este proyecto"
+        />
+      </div>
+
+      {headings.length > 0 && (
+        <div class="block w-full lg:hidden">
+          <TableOfContents headings={headings} enableScrollSpy />
+        </div>
+      )}
+      
+      {/* Mobile series navegación */}
+      <div class="block w-full lg:hidden mt-4">
+        <details
+          open
+          class="group block rounded-xl border p-4"
+        >
+          <summary
+            class="flex cursor-pointer items-center justify-between text-xl font-semibold group-open:pb-4"
+          >
+            En esta serie
+            <Icon
+              name="lucide:chevron-down"
+              class="size-5 transition-transform group-open:rotate-180"
+            />
+          </summary>
+          <div class="flex flex-col gap-2 mt-2">
+            {/* Enlace al proyecto */}
+            <Link 
+              href={`/projects/${projectId}`} 
+              class="flex items-center gap-2 px-4 py-2 bg-primary/90 text-primary-foreground rounded-lg hover:bg-primary transition-colors"
+            >
+              <Icon name="lucide:folder" class="size-4" />
+              <span>Ir al proyecto</span>
+            </Link>
+            
+            <Separator class="my-2" />
+            
+            <div class="flex flex-col gap-2 max-h-60 overflow-y-auto pr-1">
+              {relatedPosts.map((post, index) => {
+                const isCurrentPost = post.id === postId;
+                return (
+                  <Link 
+                    href={`/projects/${projectId}/posts/${post.id.split('/').pop()}`} 
+                    class={`flex items-start gap-2 p-2 rounded-lg transition-colors ${isCurrentPost ? 'bg-secondary/70 font-medium' : 'hover:bg-secondary/50'}`}
+                  >
+                    <div class={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs ${isCurrentPost ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                      {index + 1}
+                    </div>
+                    <span class="text-sm">{post.data.title}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    {headings.length > 0 && (
+      <aside class="sticky top-[6.5rem] hidden lg:block col-start-1 self-start pr-2">
+        <div class="flex justify-end w-full">
+          <TableOfContents headings={headings} enableScrollSpy />
+        </div>
+      </aside>
+    )}
+
+    <article class="prose col-start-2 max-w-none prose-invert">
+      <Content />
+      
+      {/* Navegación entre posts del proyecto al final */}
+      <div class="mt-10">
+        <PostNavigation 
+          prevPost={prevPost} 
+          nextPost={nextPost} 
+          urlPrefix={`/projects/${projectId}/posts/`}
+          prevLabel="Siguiente en este proyecto"
+          nextLabel="Anterior en este proyecto"
+        />
+      </div>
+    </article>
+    
+    {/* Sidebar navegación de serie */}
+    <aside class="sticky top-[6.5rem] hidden lg:block col-start-3 self-start pl-2">
+      <div class="flex flex-col gap-4 border rounded-lg p-4 w-full max-w-[260px] ml-5">
+        {/* Enlace al proyecto */}
+        <Link 
+          href={`/projects/${projectId}`} 
+          class="flex items-center gap-2 px-4 py-2 text-sm bg-primary/90 text-primary-foreground rounded-lg hover:bg-primary transition-colors"
+        >
+          <Icon name="lucide:folder" class="size-4" />
+          <span>Ir al proyecto</span>
+        </Link>
+        
+        <Separator />
+        
+        <h3 class="font-semibold text-sm">En esta serie:</h3>
+        <div class="flex flex-col gap-2 max-h-[calc(100vh-20rem)] overflow-y-auto pr-2">
+          {relatedPosts.map((post, index) => {
+            const isCurrentPost = post.id === postId;
+            return (
+              <Link 
+                href={`/projects/${projectId}/posts/${post.id.split('/').pop()}`} 
+                class={`flex items-center gap-2 p-2 rounded-lg transition-colors ${isCurrentPost ? 'bg-secondary/70 font-medium' : 'hover:bg-secondary/50'}`}
+              >
+                <div class={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs ${isCurrentPost ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                  {index + 1}
+                </div>
+                <span class="text-xs">{post.data.title}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <Button
+    variant="outline"
+    size="icon"
+    className="group fixed bottom-8 right-8 z-50 hidden"
+    id="scroll-to-top"
+    title="Scroll to top"
+    aria-label="Scroll to top"
+  >
+    <Icon
+      name="lucide:arrow-up"
+      class="mx-auto size-4 transition-all group-hover:-translate-y-0.5"
+    />
+  </Button>
+
+  <script>
+    document.addEventListener('astro:page-load', () => {
+      const scrollToTopButton = document.getElementById('scroll-to-top')
+      const footer = document.querySelector('footer')
+
+      if (scrollToTopButton && footer) {
+        scrollToTopButton.addEventListener('click', () => {
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        })
+
+        window.addEventListener('scroll', () => {
+          const footerRect = footer.getBoundingClientRect()
+          const isFooterVisible = footerRect.top <= window.innerHeight
+
+          scrollToTopButton.classList.toggle(
+            'hidden',
+            window.scrollY <= 300 || isFooterVisible,
+          )
+        })
+      }
+    })
+  </script>
+</Layout>

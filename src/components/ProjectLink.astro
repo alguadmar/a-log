@@ -1,0 +1,21 @@
+---
+import Link from '@/components/Link.astro'
+import { Icon } from 'astro-icon/components'
+import type { CollectionEntry } from 'astro:content'
+
+interface Props {
+  project: CollectionEntry<'projects'>
+  showIcon?: boolean
+  className?: string
+}
+
+const { project, showIcon = true, className = '' } = Astro.props
+---
+
+<Link 
+  href={`/projects/${project.id}`} 
+  class={`inline-flex items-center gap-x-1.5 ${className}`}
+>
+  {showIcon && <Icon name="lucide:folder" class="size-4" />}
+  <span>{project.data.name}</span>
+</Link>
