@@ -6,30 +6,31 @@ import PaginationComponent from '@/components/ui/pagination'
 import { SITE } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
 import { getAllProjects } from '@/lib/data-utils'
+import type { PaginateFunction } from 'astro'
 
-// Obtenemos todos los proyectos para la primera página
-const allProjects = await getAllProjects()
-const pageSize = SITE.postsPerPage
-const firstPageData = allProjects.slice(0, pageSize)
-const totalPages = Math.ceil(allProjects.length / pageSize)
-
-// Simulamos el objeto "page" que espera el componente
-const page = {
-  data: firstPageData,
-  currentPage: 1,
-  lastPage: totalPages,
-  url: {
-    current: '/projects',
-    next: totalPages > 1 ? '/projects/2' : undefined,
-    prev: undefined
-  }
+export async function getStaticPaths({
+  paginate,
+}: {
+  paginate: PaginateFunction
+}) {
+  const allProjects = await getAllProjects()
+  return paginate(allProjects, { pageSize: SITE.postsPerPage })
 }
+
+const { page } = Astro.props
 ---
 
 <Layout>
   <PageHead slot="head" title="Proyectos" description="Explorar todos los proyectos" />
   <Breadcrumbs
-    items={[{ label: 'Proyectos', href: '/projects', icon: 'lucide:briefcase' }]}
+    items={
+      page.currentPage === 1 
+        ? [{ label: 'Proyectos', href: '/projects', icon: 'lucide:briefcase' }]
+        : [
+            { label: 'Proyectos', href: '/projects', icon: 'lucide:briefcase' },
+            { label: `Página ${page.currentPage}`, icon: 'lucide:folder-open' },
+          ]
+    }
   />
 
   <div class="flex min-h-[calc(100vh-18rem)] flex-col gap-y-8">

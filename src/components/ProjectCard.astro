@@ -16,29 +16,31 @@ const { project } = Astro.props
 <div
   class="hover:bg-secondary/50 rounded-xl border p-4 transition-colors duration-300 ease-in-out"
 >
-  <Link
-    href={`/projects/${project.id}`}
-    class="flex flex-col gap-6 sm:flex-row"
-  >
+  <div class="flex flex-col gap-6 sm:flex-row">
     {
       project.data.image && (
-        <div class="w-[250px] h-[150px] overflow-hidden rounded-md bg-muted sm:shrink-0">
+        <Link
+          href={`/projects/${project.id}`}
+          class="w-full sm:w-[250px] h-[150px] overflow-hidden rounded-md bg-muted sm:shrink-0"
+        >
           <Image
             src={project.data.image}
             alt={project.data.name}
             width={250}
             height={150}
-            class="h-full w-full object-cover"
+            class="h-full w-full object-cover transition-transform hover:scale-105"
             loading="lazy"
           />
-        </div>
+        </Link>
       )
     }
     <div class="grow flex flex-col justify-between">
       <div>
-        <h3 class="mb-2 text-lg font-medium">
-          {project.data.name}
-        </h3>
+        <Link href={`/projects/${project.id}`}>
+          <h3 class="mb-2 text-lg font-medium hover:text-primary transition-colors">
+            {project.data.name}
+          </h3>
+        </Link>
         <p class="text-muted-foreground mb-3 text-sm">
           {project.data.description}
         </p>
@@ -62,11 +64,16 @@ const { project } = Astro.props
         project.data.tags && (
           <div class="flex flex-wrap gap-2 mt-auto">
             {project.data.tags.map((tag: string) => (
-              <Badge variant="secondary" className="text-xs">{tag}</Badge>
+              <Link href={`/tags/${tag}`} class="hover:opacity-80 transition-opacity">
+                <Badge variant="secondary" className="text-xs">
+                  <Icon name="lucide:hash" class="size-3 mr-0.5" />
+                  {tag}
+                </Badge>
+              </Link>
             ))}
           </div>
         )
       }
     </div>
-  </Link>
+  </div>
 </div>

@@ -46,13 +46,25 @@ export async function getAllProjects(): Promise<CollectionEntry<'projects'>[]> {
 
 export async function getAllTags(): Promise<Map<string, number>> {
   const posts = await getAllPosts()
-
-  return posts.reduce((acc, post) => {
-    post.data.tags?.forEach((tag) => {
-      acc.set(tag, (acc.get(tag) || 0) + 1)
+  const projects = await getAllProjects()
+  
+  const tagMap = new Map<string, number>()
+  
+  // Agregar tags de posts
+  posts.forEach(post => {
+    post.data.tags?.forEach(tag => {
+      tagMap.set(tag, (tagMap.get(tag) || 0) + 1)
     })
-    return acc
-  }, new Map<string, number>())
+  })
+  
+  // Agregar tags de proyectos
+  projects.forEach(project => {
+    project.data.tags?.forEach(tag => {
+      tagMap.set(tag, (tagMap.get(tag) || 0) + 1)
+    })
+  })
+  
+  return tagMap
 }
 
 export async function getSortedTags(): Promise<
@@ -111,6 +123,13 @@ export async function getPostsByTag(
 ): Promise<CollectionEntry<'blog'>[]> {
   const posts = await getAllPosts()
   return posts.filter((post) => post.data.tags?.includes(tag))
+}
+
+export async function getProjectsByTag(
+  tag: string,
+): Promise<CollectionEntry<'projects'>[]> {
+  const projects = await getAllProjects()
+  return projects.filter((project) => project.data.tags?.includes(tag))
 }
 
 export async function getPostsByProject(

@@ -72,10 +72,10 @@ const lastRelatedPost = relatedPosts.length > 0 ? relatedPosts[relatedPosts.leng
 
       <div class="flex flex-wrap justify-center gap-2">
         {project.data.tags?.map((tag) => (
-          <span class={badgeVariants({ variant: 'secondary' })}>
+          <Link href={`/tags/${tag}`} class={badgeVariants({ variant: 'secondary' })}>
             <Icon name="lucide:hash" class="size-3 -translate-x-0.5" />
             {tag}
-          </span>
+          </Link>
         ))}
       </div>
 
