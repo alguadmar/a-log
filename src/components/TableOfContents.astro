@@ -149,74 +149,156 @@ function buildToc(headings: Heading[]): Heading[] {
     let lastManualSelection = '';
     let manualSelectionTimestamp = 0;
     
-    // Function to update the active TOC link
+    // Track all currently visible headings
+    let visibleHeadingIds = [];
+    
+    // Function to update the active TOC links
     function updateActiveLink(activeId, isManualClick = false) {
       // If this is a manual click, track it
       if (isManualClick) {
         lastManualSelection = activeId;
         manualSelectionTimestamp = Date.now();
+        
+        // Reset visible headings array, so we only highlight the clicked one
+        visibleHeadingIds = [activeId];
+        
+        // For manual clicks, we only highlight the clicked link
+        // Remove active class from all links
+        tocLinks.forEach(link => {
+          link.classList.remove('text-foreground', 'font-medium')
+          const parent = link.closest('li')
+          if (parent) {
+            parent.classList.remove('text-foreground')
+          }
+        })
+        
+        // Add active class to matching links
+        const activeLinks = document.querySelectorAll(`#toc-container li a[href="#${activeId}"], #mobile-toc-container li a[href="#${activeId}"]`)
+        activeLinks.forEach(link => {
+          link.classList.add('text-foreground', 'font-medium')
+          const parent = link.closest('li')
+          if (parent) {
+            parent.classList.add('text-foreground')
+          }
+        })
+        
+        return;
       }
       
       // If we're trying to change from a recent manual selection (within 1 second), 
       // and this isn't a manual click, ignore it
-      if (!isManualClick && 
-          lastManualSelection && 
-          activeId !== lastManualSelection && 
+      if (lastManualSelection && 
           Date.now() - manualSelectionTimestamp < 1000) {
         return;
       }
       
-      // Remove active class from all links
-      tocLinks.forEach(link => {
-        link.classList.remove('text-foreground', 'font-medium')
-        const parent = link.closest('li')
-        if (parent) {
-          parent.classList.remove('text-foreground')
-        }
-      })
-      
-      // Add active class to matching links
-      const activeLinks = document.querySelectorAll(`#toc-container li a[href="#${activeId}"], #mobile-toc-container li a[href="#${activeId}"]`)
-      activeLinks.forEach(link => {
-        link.classList.add('text-foreground', 'font-medium')
-        const parent = link.closest('li')
-        if (parent) {
-          parent.classList.add('text-foreground')
-        }
-      })
+      // This is for automatic updates based on visible headings
+      // The activeId parameter might be a single ID or an array of IDs
+      if (Array.isArray(activeId)) {
+        // First, remove active class from all links
+        tocLinks.forEach(link => {
+          const linkHeadingId = link.getAttribute('href')?.substring(1);
+          if (!activeId.includes(linkHeadingId)) {
+            link.classList.remove('text-foreground', 'font-medium')
+            const parent = link.closest('li')
+            if (parent) {
+              parent.classList.remove('text-foreground')
+            }
+          }
+        })
+        
+        // Then add active class to all visible heading links
+        activeId.forEach(id => {
+          const visibleLinks = document.querySelectorAll(`#toc-container li a[href="#${id}"], #mobile-toc-container li a[href="#${id}"]`)
+          visibleLinks.forEach(link => {
+            link.classList.add('text-foreground', 'font-medium')
+            const parent = link.closest('li')
+            if (parent) {
+              parent.classList.add('text-foreground')
+            }
+          })
+        })
+      } else {
+        // Single ID case (for backward compatibility)
+        // Remove active class from all links
+        tocLinks.forEach(link => {
+          link.classList.remove('text-foreground', 'font-medium')
+          const parent = link.closest('li')
+          if (parent) {
+            parent.classList.remove('text-foreground')
+          }
+        })
+        
+        // Add active class to matching links
+        const activeLinks = document.querySelectorAll(`#toc-container li a[href="#${activeId}"], #mobile-toc-container li a[href="#${activeId}"]`)
+        activeLinks.forEach(link => {
+          link.classList.add('text-foreground', 'font-medium')
+          const parent = link.closest('li')
+          if (parent) {
+            parent.classList.add('text-foreground')
+          }
+        })
+      }
     }
     
-    // Set up IntersectionObserver to detect which heading is in view
+    // Set up IntersectionObserver to detect which headings are in view
     const observer = new IntersectionObserver(
       (entries) => {
-        // Prioritize entries that just entered the viewport
-        const entry = entries.find(e => e.isIntersecting && e.intersectionRatio > 0.1);
-        
-        if (entry) {
-          // Immediately update for the entry that's now visible
-          updateActiveLink(entry.target.id);
+        // Check if this is right after a manual click
+        if (lastManualSelection && Date.now() - manualSelectionTimestamp < 1000) {
+          // Don't override manual selection
           return;
         }
         
-        // Fallback to checking all visible headings
-        const visibleHeadings = entries
-          .filter(entry => entry.isIntersecting)
-          .map(entry => entry.target)
+        // Check if we have entries that are entering or exiting
+        const hasTransitions = entries.some(entry => 
+          (entry.isIntersecting && !visibleHeadingIds.includes(entry.target.id)) || 
+          (!entry.isIntersecting && visibleHeadingIds.includes(entry.target.id))
+        );
         
-        if (visibleHeadings.length > 0) {
-          // Find the heading closest to the top
-          const mostVisibleHeading = visibleHeadings.reduce((prev, current) => {
-            const prevDistance = Math.abs(prev.getBoundingClientRect().top - headerHeight)
-            const currentDistance = Math.abs(current.getBoundingClientRect().top - headerHeight)
-            return currentDistance < prevDistance ? current : prev
-          }, visibleHeadings[0])
+        // If there's a rapid change in view (like during fast scrolling),
+        // clear the current visible headings to avoid stale state
+        if (hasTransitions && entries.length > 1) {
+          visibleHeadingIds = [];
+        }
+        
+        // Update our tracking of visible headings based on new entries
+        entries.forEach(entry => {
+          const headingId = entry.target.id;
           
-          updateActiveLink(mostVisibleHeading.id)
+          if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
+            // Add to visible headings if not already there
+            if (!visibleHeadingIds.includes(headingId)) {
+              visibleHeadingIds.push(headingId);
+            }
+          } else {
+            // Remove from visible headings
+            visibleHeadingIds = visibleHeadingIds.filter(id => id !== headingId);
+          }
+        });
+        
+        if (visibleHeadingIds.length > 0) {
+          // Update all visible headings at once
+          updateActiveLink(visibleHeadingIds);
+        } else {
+          // If no headings are visible, find the nearest one
+          const nearestEntry = entries.reduce((nearest, entry) => {
+            if (!nearest) return entry;
+            
+            const nearestDistance = Math.abs(nearest.boundingClientRect.top);
+            const currentDistance = Math.abs(entry.boundingClientRect.top);
+            
+            return currentDistance < nearestDistance ? entry : nearest;
+          }, null);
+          
+          if (nearestEntry) {
+            updateActiveLink(nearestEntry.target.id);
+          }
         }
       },
       {
-        rootMargin: `-${headerHeight}px 0px -20% 0px`,
-        threshold: [0, 0.1, 0.5] // Más sensible para responder más rápido
+        rootMargin: `-${headerHeight + 20}px 0px -20% 0px`,
+        threshold: [0, 0.1, 0.2, 0.5, 0.8] // More threshold points for better detection
       }
     )
     
@@ -237,6 +319,52 @@ function buildToc(headings: Heading[]): Heading[] {
     else if (headings.length > 0 && headings[0].id) {
       updateActiveLink(headings[0].id)
     }
+    
+    // Add scroll listener to handle rapid scrolling
+    let scrollTimeout;
+    let lastScrollTop = 0;
+    let scrollDirection = 0;  // 0 = no scroll, 1 = scrolling down, -1 = scrolling up
+    
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      
+      // Determine scroll direction
+      const newDirection = scrollTop > lastScrollTop ? 1 : -1;
+      
+      // If direction changed, might need to reset visible headings
+      if (scrollDirection !== 0 && newDirection !== scrollDirection) {
+        visibleHeadingIds = [];
+      }
+      
+      scrollDirection = newDirection;
+      lastScrollTop = scrollTop;
+      
+      // Clear previous timeout
+      clearTimeout(scrollTimeout);
+      
+      // Set new timeout - after scrolling stops for 100ms, scan for visible headings
+      scrollTimeout = setTimeout(() => {
+        // Only process if we're not in a period right after a manual click
+        if (!lastManualSelection || Date.now() - manualSelectionTimestamp > 1000) {
+          // Reset direction to "no scroll"
+          scrollDirection = 0;
+          
+          // Trigger a check for visible headings if none are currently tracked
+          if (visibleHeadingIds.length === 0) {
+            // Find the closest heading to the viewport
+            const sortedHeadings = [...headings].sort((a, b) => {
+              const aRect = a.getBoundingClientRect();
+              const bRect = b.getBoundingClientRect();
+              return Math.abs(aRect.top - headerHeight) - Math.abs(bRect.top - headerHeight);
+            });
+            
+            if (sortedHeadings.length > 0 && sortedHeadings[0].id) {
+              updateActiveLink(sortedHeadings[0].id);
+            }
+          }
+        }
+      }, 100);
+    }, { passive: true });
   }
 
   // Set up on page load and after transitions
