@@ -103,6 +103,11 @@
     transition: none !important;
   }
 
+  body {
+    @apply bg-background;
+    transition: background-color var(--transition-duration);
+  }
+
   *,
   ::before,
   ::after {

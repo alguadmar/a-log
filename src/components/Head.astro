@@ -35,11 +35,31 @@ import Favicons from './Favicons.astro'
         document.documentElement.classList.remove('dark');
       }
       
-      // Remove the unset class to apply proper transitions
-      document.documentElement.classList.remove('color-scheme-unset');
-      
       // Set background color immediately to prevent flash
-      document.documentElement.style.backgroundColor = isDark ? '#09090b' : '#ffffff';
+      const bgColor = isDark ? '#09090b' : '#ffffff';
+      document.documentElement.style.backgroundColor = bgColor;
+      
+      // Set body background color as well (important for theme toggle)
+      if (document.body) {
+        document.body.style.backgroundColor = bgColor;
+      } else {
+        // If body isn't available yet, set it after DOM content loaded
+        document.addEventListener('DOMContentLoaded', () => {
+          document.body.style.backgroundColor = bgColor;
+        });
+      }
+      
+      // Wait for DOM to be ready before enabling transitions
+      document.addEventListener('DOMContentLoaded', () => {
+        // Remove the unset class to apply proper transitions
+        document.documentElement.classList.remove('color-scheme-unset');
+        
+        // After a delay, remove inline styles to let CSS take over
+        setTimeout(() => {
+          document.documentElement.style.backgroundColor = '';
+          document.body.style.backgroundColor = '';
+        }, 100);
+      });
     })();
   </script>
 

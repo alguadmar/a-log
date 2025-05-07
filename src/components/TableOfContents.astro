@@ -52,11 +52,11 @@ function buildToc(headings: Heading[]): Heading[] {
   </summary>
   <ScrollArea
     client:load
-    className="flex max-h-64 flex-col overflow-y-auto"
+    className="flex max-h-64 flex-col overflow-y-auto text-left"
     type="always"
   >
     <nav>
-      <ul>
+      <ul id="mobile-toc-container" class="text-left">
         {toc.map((heading) => <TableOfContentsHeading heading={heading} />)}
       </ul>
     </nav>
@@ -81,38 +81,165 @@ function buildToc(headings: Heading[]): Heading[] {
   </div>
 </nav>
 
+<style>
+  /* Fast transition for immediate feedback */
+  :global(.toc-link) {
+    transition: opacity 0.15s ease !important;
+  }
+  
+  /* Active link */
+  :global(.toc-link.text-foreground) {
+    @apply font-medium;
+  }
+  
+  /* Inactive link */
+  :global(.toc-link:not(.text-foreground)) {
+    opacity: 0.6;
+  }
+  
+  /* Ensure transitions work even when disable-transitions is active */
+  :global(html.disable-transitions .toc-link),
+  :global(html.color-scheme-unset .toc-link) {
+    transition: opacity 0.15s ease !important;
+  }
+</style>
+
 <script>
   function setupToc() {
+    // Get header height for offset calculations
     const header = document.querySelector('header')
     const headerHeight = header ? header.offsetHeight : 0
-
+    
+    // Get all headings in the article
+    const headings = Array.from(document.querySelectorAll('.prose h2, .prose h3, .prose h4, .prose h5, .prose h6'))
+    
+    // Get all links in the TOC (both desktop and mobile)
+    const tocLinks = document.querySelectorAll('#toc-container li a[href^="#"], #mobile-toc-container li a[href^="#"]')
+    
+    // Add click handler for smooth scrolling
+    tocLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault()
+        const targetId = link.getAttribute('href').substring(1)
+        const targetElement = document.getElementById(targetId)
+        
+        if (targetElement) {
+          // First, update the active link immediately to give visual feedback
+          updateActiveLink(targetId, true) // true = manual click
+          
+          // Scroll to the target with offset for header
+          const targetPosition = targetElement.getBoundingClientRect().top + window.scrollY - headerHeight - 20
+          window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+          })
+          
+          // Update URL hash without scrolling
+          history.pushState(null, null, '#' + targetId)
+          
+          // Ensure the link stays active even after scroll events by adding a small delay
+          setTimeout(() => {
+            updateActiveLink(targetId, true) // true = manual click
+          }, 300) // Increased timeout for more reliable highlighting
+        }
+      })
+    })
+    
+    // Track when a manual click was performed
+    let lastManualSelection = '';
+    let manualSelectionTimestamp = 0;
+    
+    // Function to update the active TOC link
+    function updateActiveLink(activeId, isManualClick = false) {
+      // If this is a manual click, track it
+      if (isManualClick) {
+        lastManualSelection = activeId;
+        manualSelectionTimestamp = Date.now();
+      }
+      
+      // If we're trying to change from a recent manual selection (within 1 second), 
+      // and this isn't a manual click, ignore it
+      if (!isManualClick && 
+          lastManualSelection && 
+          activeId !== lastManualSelection && 
+          Date.now() - manualSelectionTimestamp < 1000) {
+        return;
+      }
+      
+      // Remove active class from all links
+      tocLinks.forEach(link => {
+        link.classList.remove('text-foreground', 'font-medium')
+        const parent = link.closest('li')
+        if (parent) {
+          parent.classList.remove('text-foreground')
+        }
+      })
+      
+      // Add active class to matching links
+      const activeLinks = document.querySelectorAll(`#toc-container li a[href="#${activeId}"], #mobile-toc-container li a[href="#${activeId}"]`)
+      activeLinks.forEach(link => {
+        link.classList.add('text-foreground', 'font-medium')
+        const parent = link.closest('li')
+        if (parent) {
+          parent.classList.add('text-foreground')
+        }
+      })
+    }
+    
+    // Set up IntersectionObserver to detect which heading is in view
     const observer = new IntersectionObserver(
-      (sections) => {
-        sections.forEach((section) => {
-          const heading = section.target.querySelector('h2, h3, h4, h5, h6')
-          if (!heading) return
-
-          const id = heading.getAttribute('id')
-          const link = document.querySelector(
-            `#toc-container li a[href="#${id}"]`,
-          )
-          if (!link) return
-
-          const addRemove = section.isIntersecting ? 'add' : 'remove'
-          link.classList[addRemove]('text-foreground')
-        })
+      (entries) => {
+        // Prioritize entries that just entered the viewport
+        const entry = entries.find(e => e.isIntersecting && e.intersectionRatio > 0.1);
+        
+        if (entry) {
+          // Immediately update for the entry that's now visible
+          updateActiveLink(entry.target.id);
+          return;
+        }
+        
+        // Fallback to checking all visible headings
+        const visibleHeadings = entries
+          .filter(entry => entry.isIntersecting)
+          .map(entry => entry.target)
+        
+        if (visibleHeadings.length > 0) {
+          // Find the heading closest to the top
+          const mostVisibleHeading = visibleHeadings.reduce((prev, current) => {
+            const prevDistance = Math.abs(prev.getBoundingClientRect().top - headerHeight)
+            const currentDistance = Math.abs(current.getBoundingClientRect().top - headerHeight)
+            return currentDistance < prevDistance ? current : prev
+          }, visibleHeadings[0])
+          
+          updateActiveLink(mostVisibleHeading.id)
+        }
       },
       {
-        rootMargin: `-${headerHeight}px 0px 0px 0px`,
-      },
+        rootMargin: `-${headerHeight}px 0px -20% 0px`,
+        threshold: [0, 0.1, 0.5] // Más sensible para responder más rápido
+      }
     )
-
-    const sections = document.querySelectorAll('.prose section')
-    sections.forEach((section) => {
-      observer.observe(section)
+    
+    // Observe all headings
+    headings.forEach(heading => {
+      if (heading.id) {
+        observer.observe(heading)
+      }
     })
+    
+    // Check if there's a hash in the URL and highlight the corresponding link
+    if (window.location.hash) {
+      const id = window.location.hash.substring(1)
+      updateActiveLink(id)
+    }
+    
+    // If no hash, highlight the first heading by default
+    else if (headings.length > 0 && headings[0].id) {
+      updateActiveLink(headings[0].id)
+    }
   }
 
+  // Set up on page load and after transitions
   document.addEventListener('astro:page-load', setupToc)
   document.addEventListener('astro:after-swap', setupToc)
 </script>

@@ -1,0 +1,74 @@
+---
+name: 'NotasApp'
+description: 'Aplicación de notas con sincronización en la nube, markdown y etiquetas, compatible con dispositivos móviles y escritorio'
+tags: ['JavaScript', 'Node.js', 'MongoDB', 'PWA']
+image: '/static/preview-2.png'
+link: 'https://github.com/alguadmar/notasapp'
+startDate: '2023-09-10'
+endDate: '2024-01-15'
+---
+
+# NotasApp: Aplicación de notas con sincronización en la nube
+
+NotasApp es una solución completa para tomar notas con soporte para markdown, etiquetas, y sincronización multiplataforma.
+
+## Características principales
+
+- **Editor markdown**: Soporte completo para sintaxis markdown con vista previa en tiempo real
+- **Organización por etiquetas**: Sistema de etiquetas para clasificar y filtrar notas
+- **Sincronización en la nube**: Acceso a tus notas desde cualquier dispositivo
+- **Modo offline**: Funcionalidad completa incluso sin conexión a internet
+- **Exportación/Importación**: Capacidad de exportar e importar notas en varios formatos
+
+## Stack tecnológico
+
+### Frontend
+- Vanilla JavaScript con arquitectura modular
+- IndexedDB para almacenamiento local
+- Service Workers para funcionalidad offline
+- Estrategias de caché y sincronización inteligente
+
+### Backend
+- Node.js con Express
+- MongoDB para almacenamiento
+- Sistema de autenticación JWT
+- API RESTful
+
+## Arquitectura técnica
+
+La aplicación sigue una arquitectura de Progressive Web App (PWA) con:
+
+1. **Capa de presentación**: UI/UX responsive optimizada para móvil y escritorio
+2. **Capa de lógica de negocio**: Servicios modulares para gestión de notas, etiquetas, búsqueda, etc.
+3. **Capa de datos**: Abstracción sobre IndexedDB local y API REST
+4. **Capa de sincronización**: Estrategias eficientes para resolver conflictos y sincronizar datos
+
+## Proceso de desarrollo
+
+El desarrollo de NotasApp siguió una metodología ágil:
+
+1. Investigación de necesidades de usuarios y soluciones existentes
+2. Prototipado de UI/UX en Figma
+3. Desarrollo iterativo con sprints de dos semanas
+4. Pruebas continuas de usabilidad y ajustes
+5. Implementación de funcionalidades progresivamente
+6. Despliegue y monitoreo de rendimiento
+
+## Desafíos técnicos
+
+Durante el desarrollo, me enfrenté a varios retos técnicos:
+
+- **Sincronización bidireccional**: Implementé un sistema de resolución de conflictos basado en timestamps
+- **Rendimiento del editor**: Optimicé el renderizado markdown para textos largos
+- **Estrategia offline-first**: Diseñé un sistema robusto de caché y sincronización diferida
+
+## Resultados y aprendizajes
+
+Este proyecto me permitió profundizar en:
+
+- Arquitecturas offline-first y PWA
+- Estrategias de sincronización de datos
+- Optimización de rendimiento frontend
+- UX en aplicaciones de productividad
+
+La aplicación está actualmente en uso por más de 200 usuarios activos y sigo recibiendo retroalimentación para mejorarla constantemente.

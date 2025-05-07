@@ -17,8 +17,7 @@ const projects = await getAllProjects()
     <div class="min-w-full">
       <div class="prose mb-8">
         <p class="mb-4">
-          astro-erudite is an opinionated, unstyled static blogging template
-          that prioritizes simplicity and performance, built with <Link
+          a-log es un blog personal desarrollado con <Link
             href="https://astro.build"
             class="text-foreground"
             external
@@ -28,26 +27,25 @@ const projects = await getAllProjects()
             class="text-foreground"
             external
             underline>Tailwind</Link
-          >, and <Link
+          >, y <Link
             href="https://ui.shadcn.com"
             class="text-foreground"
             external
             underline>shadcn/ui</Link
-          >. It provides a clean foundation for your content while being
-          extremely easy to customize.
+          >. Funciona como un archivo de pensamiento libre y una bitácora de aprendizaje.
         </p>
         <p>
-          To learn more about the philosophy behind this template, check out the
-          following blog post: <Link
+          Para conocer más sobre la filosofía detrás de este proyecto, puedes consultar
+          el siguiente post: <Link
             href="/blog/the-state-of-static-blogs"
             class="text-foreground"
-            underline>The State of Static Blogs in 2024</Link
+            underline>El estado de los blogs estáticos en 2024</Link
           >.
         </p>
       </div>
 
-      <h2 class="mb-4 text-2xl font-medium">Example Projects Listing</h2>
-      <div class="flex flex-col gap-4">
+      <h2 class="mb-4 text-2xl font-medium">Proyectos Destacados</h2>
+      <div class="flex flex-col gap-6">
         {projects.map((project) => <ProjectCard project={project} />)}
       </div>
     </div>

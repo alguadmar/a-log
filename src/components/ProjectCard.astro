@@ -18,29 +18,32 @@ const { project } = Astro.props
 >
   <Link
     href={project.data.link}
-    class="flex flex-col gap-4 sm:flex-row"
+    class="flex flex-col gap-6 sm:flex-row"
     external
   >
     {
       project.data.image && (
-        <div class="max-w-3xs sm:shrink-0">
+        <div class="w-[250px] h-[150px] overflow-hidden rounded-md bg-muted sm:shrink-0">
           <Image
             src={project.data.image}
             alt={project.data.name}
-            width={1200}
-            height={630}
-            class="object-cover"
+            width={250}
+            height={150}
+            class="h-full w-full object-cover"
+            loading="lazy"
           />
         </div>
       )
     }
-    <div class="grow">
-      <h3 class="mb-1 text-lg font-medium">
-        {project.data.name}
-      </h3>
-      <p class="text-muted-foreground mb-2 text-sm">
-        {project.data.description}
-      </p>
+    <div class="grow flex flex-col justify-between">
+      <div>
+        <h3 class="mb-2 text-lg font-medium">
+          {project.data.name}
+        </h3>
+        <p class="text-muted-foreground mb-3 text-sm">
+          {project.data.description}
+        </p>
+      </div>
       {
         project.data.startDate && (
           <p class="text-muted-foreground/70 mb-2 flex items-center gap-x-1.5 text-xs">
@@ -58,9 +61,9 @@ const { project } = Astro.props
       }
       {
         project.data.tags && (
-          <div class="flex flex-wrap gap-2">
+          <div class="flex flex-wrap gap-2 mt-auto">
             {project.data.tags.map((tag: string) => (
-              <Badge variant="secondary">{tag}</Badge>
+              <Badge variant="secondary" className="text-xs">{tag}</Badge>
             ))}
           </div>
         )

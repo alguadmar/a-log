@@ -29,17 +29,17 @@ const authors = await parseAuthors(entry.data.authors ?? [])
     {
       entry.data.image && (
       <div class="w-[250px] overflow-hidden rounded-md bg-muted sm:shrink-0">
-  <Image
-    src={entry.data.image}
-    alt={entry.data.title}
-    class="h-full w-full object-contain"
-    loading="lazy"
-  />
-</div>              
-              )
+        <Image
+          src={entry.data.image}
+          alt={entry.data.title}
+          class="h-full w-full object-contain"
+          loading="lazy"
+        />
+      </div>              
+      )
     }
 
-    <div class="grow">
+    <div class="grow w-full">
       <h3 class="mb-1 text-lg font-medium">{entry.data.title}</h3>
       <p class="text-muted-foreground mb-2 text-sm">{entry.data.description}</p>
 
