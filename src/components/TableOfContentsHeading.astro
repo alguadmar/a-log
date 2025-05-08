@@ -9,32 +9,20 @@ interface Props {
 }
 
 const { heading, activeSlug } = Astro.props
-const isActive = heading.slug === activeSlug
 ---
 
-<li
-  class={cn(
-    'list-inside list-disc px-4 text-xs text-left xl:list-none xl:p-0 xl:max-w-[280px] transition-colors duration-300',
-    isActive ? 'text-foreground' : 'text-foreground/60',
-    activeSlug && 'xl:text-left',
-  )}
->
+<li class="list-inside list-disc px-4 text-xs text-left xl:list-none xl:p-0 xl:max-w-[280px]">
   <Link
-    href={activeSlug ? heading.slug : '#' + heading.slug}
-    class="py-1 underline decoration-transparent underline-offset-[3px] transition-colors duration-200 hover:decoration-inherit xl:py-0 toc-link text-left text-start xl:text-left"
+    href={'#' + heading.slug}
+    class="py-1 underline decoration-transparent underline-offset-[3px] hover:decoration-inherit xl:py-0 toc-link text-left text-start xl:text-left"
   >
     {heading.text}
   </Link>
   {
     heading.subheadings && heading.subheadings.length > 0 && (
-      <ul
-        class={cn(
-          'translate-x-3 text-left xl:ml-4 xl:mt-2 xl:flex xl:translate-x-0 xl:flex-col xl:gap-2',
-          activeSlug && 'xl:ml-0 xl:mr-4',
-        )}
-      >
+      <ul class="translate-x-3 text-left xl:ml-4 xl:mt-2 xl:flex xl:translate-x-0 xl:flex-col xl:gap-2">
         {heading.subheadings.map((subheading: Heading) => (
-          <Astro.self heading={subheading} activeSlug={activeSlug} />
+          <Astro.self heading={subheading} />
         ))}
       </ul>
     )

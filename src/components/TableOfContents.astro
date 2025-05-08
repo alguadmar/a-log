@@ -37,6 +37,7 @@ function buildToc(headings: Heading[]): Heading[] {
 }
 ---
 
+<!-- Versión móvil como desplegable -->
 <details
   open
   class="group col-start-2 block rounded-xl border p-4 xl:hidden"
@@ -44,7 +45,7 @@ function buildToc(headings: Heading[]): Heading[] {
   <summary
     class="flex cursor-pointer items-center justify-between text-xl font-semibold group-open:pb-4"
   >
-    Table of Contents
+    Tabla de Contenidos
     <Icon
       name="lucide:chevron-down"
       class="size-5 transition-transform group-open:rotate-180"
@@ -63,6 +64,7 @@ function buildToc(headings: Heading[]): Heading[] {
   </ScrollArea>
 </details>
 
+<!-- Versión desktop como barra lateral -->
 <nav
   class="sticky top-[5.5rem] col-start-1 hidden h-[calc(100vh-5.5rem)] text-xs leading-4 xl:block"
 >
@@ -73,7 +75,7 @@ function buildToc(headings: Heading[]): Heading[] {
         id="toc-container"
       >
         <li>
-          <h2 class="mb-2 text-lg font-semibold">Table of Contents</h2>
+          <h2 class="mb-2 text-lg font-semibold">Tabla de Contenidos</h2>
         </li>
         {toc.map((heading) => <TableOfContentsHeading heading={heading} />)}
       </ul>
@@ -82,41 +84,39 @@ function buildToc(headings: Heading[]): Heading[] {
 </nav>
 
 <style>
-  /* Fast transition for immediate feedback */
+  /* Estilo para enlaces activos e inactivos */
   :global(.toc-link) {
-    transition: opacity 0.15s ease !important;
-  }
-  
-  /* Active link */
-  :global(.toc-link.text-foreground) {
-    @apply font-medium;
-  }
-  
-  /* Inactive link */
-  :global(.toc-link:not(.text-foreground)) {
     opacity: 0.6;
+    transition: opacity 0.2s ease;
   }
   
-  /* Ensure transitions work even when disable-transitions is active */
-  :global(html.disable-transitions .toc-link),
-  :global(html.color-scheme-unset .toc-link) {
-    transition: opacity 0.15s ease !important;
+  :global(.toc-link.active) {
+    opacity: 1;
+    font-weight: 500;
+  }
+  
+  :global(.toc-link:hover) {
+    opacity: 0.9;
   }
 </style>
 
 <script>
   function setupToc() {
-    // Get header height for offset calculations
+    // Altura del header para cálculos de offset
     const header = document.querySelector('header')
     const headerHeight = header ? header.offsetHeight : 0
     
-    // Get all headings in the article
+    // Obtener todos los encabezados en el artículo
     const headings = Array.from(document.querySelectorAll('.prose h2, .prose h3, .prose h4, .prose h5, .prose h6'))
     
-    // Get all links in the TOC (both desktop and mobile)
+    // Obtener todos los enlaces en el TOC (desktop y móvil)
     const tocLinks = document.querySelectorAll('#toc-container li a[href^="#"], #mobile-toc-container li a[href^="#"]')
     
-    // Add click handler for smooth scrolling
+    // Variable para controlar temporalmente la actualización del IntersectionObserver
+    let isManualNavigation = false;
+    let manualNavigationTimeout = null;
+    
+    // Añadir manejador de clics para scroll suave
     tocLinks.forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault()
@@ -124,250 +124,134 @@ function buildToc(headings: Heading[]): Heading[] {
         const targetElement = document.getElementById(targetId)
         
         if (targetElement) {
-          // First, update the active link immediately to give visual feedback
-          updateActiveLink(targetId, true) // true = manual click
+          // Indicar que estamos en navegación manual
+          isManualNavigation = true;
+          clearTimeout(manualNavigationTimeout);
           
-          // Scroll to the target with offset for header
+          // Actualizar la clase activa inmediatamente
+          updateActiveLink(targetId)
+          
+          // Actualizar estado de encabezados visibles
+          currentlyVisibleHeadings = [targetId];
+          
+          // Scroll al destino con offset para header
           const targetPosition = targetElement.getBoundingClientRect().top + window.scrollY - headerHeight - 20
           window.scrollTo({
             top: targetPosition,
             behavior: 'smooth'
           })
           
-          // Update URL hash without scrolling
+          // Actualizar URL hash sin scroll
           history.pushState(null, null, '#' + targetId)
           
-          // Ensure the link stays active even after scroll events by adding a small delay
-          setTimeout(() => {
-            updateActiveLink(targetId, true) // true = manual click
-          }, 300) // Increased timeout for more reliable highlighting
+          // Después de un tiempo, volver a dejar que el IntersectionObserver actualice
+          manualNavigationTimeout = setTimeout(() => {
+            isManualNavigation = false;
+          }, 1000); // Esperar 1 segundo después del clic
         }
       })
     })
     
-    // Track when a manual click was performed
-    let lastManualSelection = '';
-    let manualSelectionTimestamp = 0;
+    // Array para mantener el estado actual de los encabezados visibles
+    let currentlyVisibleHeadings = []
     
-    // Track all currently visible headings
-    let visibleHeadingIds = [];
-    
-    // Function to update the active TOC links
-    function updateActiveLink(activeId, isManualClick = false) {
-      // If this is a manual click, track it
-      if (isManualClick) {
-        lastManualSelection = activeId;
-        manualSelectionTimestamp = Date.now();
-        
-        // Reset visible headings array, so we only highlight the clicked one
-        visibleHeadingIds = [activeId];
-        
-        // For manual clicks, we only highlight the clicked link
-        // Remove active class from all links
-        tocLinks.forEach(link => {
-          link.classList.remove('text-foreground', 'font-medium')
-          const parent = link.closest('li')
-          if (parent) {
-            parent.classList.remove('text-foreground')
-          }
-        })
-        
-        // Add active class to matching links
-        const activeLinks = document.querySelectorAll(`#toc-container li a[href="#${activeId}"], #mobile-toc-container li a[href="#${activeId}"]`)
-        activeLinks.forEach(link => {
-          link.classList.add('text-foreground', 'font-medium')
-          const parent = link.closest('li')
-          if (parent) {
-            parent.classList.add('text-foreground')
-          }
-        })
-        
-        return;
-      }
-      
-      // If we're trying to change from a recent manual selection (within 1 second), 
-      // and this isn't a manual click, ignore it
-      if (lastManualSelection && 
-          Date.now() - manualSelectionTimestamp < 1000) {
-        return;
-      }
-      
-      // This is for automatic updates based on visible headings
-      // The activeId parameter might be a single ID or an array of IDs
-      if (Array.isArray(activeId)) {
-        // First, remove active class from all links
-        tocLinks.forEach(link => {
-          const linkHeadingId = link.getAttribute('href')?.substring(1);
-          if (!activeId.includes(linkHeadingId)) {
-            link.classList.remove('text-foreground', 'font-medium')
-            const parent = link.closest('li')
-            if (parent) {
-              parent.classList.remove('text-foreground')
-            }
-          }
-        })
-        
-        // Then add active class to all visible heading links
-        activeId.forEach(id => {
-          const visibleLinks = document.querySelectorAll(`#toc-container li a[href="#${id}"], #mobile-toc-container li a[href="#${id}"]`)
-          visibleLinks.forEach(link => {
-            link.classList.add('text-foreground', 'font-medium')
-            const parent = link.closest('li')
-            if (parent) {
-              parent.classList.add('text-foreground')
-            }
-          })
-        })
-      } else {
-        // Single ID case (for backward compatibility)
-        // Remove active class from all links
-        tocLinks.forEach(link => {
-          link.classList.remove('text-foreground', 'font-medium')
-          const parent = link.closest('li')
-          if (parent) {
-            parent.classList.remove('text-foreground')
-          }
-        })
-        
-        // Add active class to matching links
-        const activeLinks = document.querySelectorAll(`#toc-container li a[href="#${activeId}"], #mobile-toc-container li a[href="#${activeId}"]`)
-        activeLinks.forEach(link => {
-          link.classList.add('text-foreground', 'font-medium')
-          const parent = link.closest('li')
-          if (parent) {
-            parent.classList.add('text-foreground')
-          }
-        })
-      }
-    }
-    
-    // Set up IntersectionObserver to detect which headings are in view
+    // Configurar IntersectionObserver para detectar los encabezados visibles
     const observer = new IntersectionObserver(
       (entries) => {
-        // Check if this is right after a manual click
-        if (lastManualSelection && Date.now() - manualSelectionTimestamp < 1000) {
-          // Don't override manual selection
-          return;
-        }
-        
-        // Check if we have entries that are entering or exiting
-        const hasTransitions = entries.some(entry => 
-          (entry.isIntersecting && !visibleHeadingIds.includes(entry.target.id)) || 
-          (!entry.isIntersecting && visibleHeadingIds.includes(entry.target.id))
-        );
-        
-        // If there's a rapid change in view (like during fast scrolling),
-        // clear the current visible headings to avoid stale state
-        if (hasTransitions && entries.length > 1) {
-          visibleHeadingIds = [];
-        }
-        
-        // Update our tracking of visible headings based on new entries
+        // Si estamos en modo de navegación manual, no actualizar mediante IntersectionObserver
+        if (isManualNavigation) return;
+      
+        // Procesar las entradas para actualizar cuáles están visibles
         entries.forEach(entry => {
-          const headingId = entry.target.id;
+          const headingId = entry.target.id
           
-          if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
-            // Add to visible headings if not already there
-            if (!visibleHeadingIds.includes(headingId)) {
-              visibleHeadingIds.push(headingId);
+          if (entry.isIntersecting) {
+            // Añadir a la lista de visibles si no está ya
+            if (!currentlyVisibleHeadings.includes(headingId)) {
+              currentlyVisibleHeadings.push(headingId)
             }
           } else {
-            // Remove from visible headings
-            visibleHeadingIds = visibleHeadingIds.filter(id => id !== headingId);
+            // Quitar de la lista de visibles
+            currentlyVisibleHeadings = currentlyVisibleHeadings.filter(id => id !== headingId)
           }
-        });
+        })
         
-        if (visibleHeadingIds.length > 0) {
-          // Update all visible headings at once
-          updateActiveLink(visibleHeadingIds);
-        } else {
-          // If no headings are visible, find the nearest one
-          const nearestEntry = entries.reduce((nearest, entry) => {
-            if (!nearest) return entry;
-            
-            const nearestDistance = Math.abs(nearest.boundingClientRect.top);
-            const currentDistance = Math.abs(entry.boundingClientRect.top);
-            
-            return currentDistance < nearestDistance ? entry : nearest;
-          }, null);
+        // Aplicar los cambios visualmente
+        if (currentlyVisibleHeadings.length > 0) {
+          // Primera, eliminar todas las marcas activas
+          tocLinks.forEach(link => {
+            link.classList.remove('active')
+          })
           
-          if (nearestEntry) {
-            updateActiveLink(nearestEntry.target.id);
+          // Luego, resaltar todos los encabezados actualmente visibles
+          currentlyVisibleHeadings.forEach(id => {
+            highlightLink(id)
+          })
+        } else if (entries.length > 0) {
+          // Si no hay encabezados visibles, encontrar el más cercano al viewport
+          let nearestHeading = null
+          let minDistance = Infinity
+          
+          entries.forEach(entry => {
+            const distance = Math.abs(entry.boundingClientRect.top)
+            if (distance < minDistance) {
+              minDistance = distance
+              nearestHeading = entry.target
+            }
+          })
+          
+          if (nearestHeading && nearestHeading.id) {
+            updateActiveLink(nearestHeading.id)
           }
         }
       },
       {
         rootMargin: `-${headerHeight + 20}px 0px -20% 0px`,
-        threshold: [0, 0.1, 0.2, 0.5, 0.8] // More threshold points for better detection
+        threshold: [0, 0.1, 0.5]
       }
     )
     
-    // Observe all headings
+    // Observar todos los encabezados
     headings.forEach(heading => {
       if (heading.id) {
         observer.observe(heading)
       }
     })
     
-    // Check if there's a hash in the URL and highlight the corresponding link
+    // Función para resaltar un enlace específico sin quitar los demás resaltados
+    function highlightLink(id) {
+      const selector = `#toc-container li a[href="#${id}"], #mobile-toc-container li a[href="#${id}"]`
+      const links = document.querySelectorAll(selector)
+      links.forEach(link => {
+        link.classList.add('active')
+      })
+    }
+    
+    // Función para actualizar el enlace activo (usado en clics)
+    function updateActiveLink(activeId) {
+      // Eliminar clase activa de todos los enlaces
+      tocLinks.forEach(link => {
+        link.classList.remove('active')
+      })
+      
+      // Añadir clase activa al enlace correspondiente
+      const activeLinks = document.querySelectorAll(`#toc-container li a[href="#${activeId}"], #mobile-toc-container li a[href="#${activeId}"]`)
+      activeLinks.forEach(link => {
+        link.classList.add('active')
+      })
+    }
+    
+    // Verificar si hay un hash en la URL
     if (window.location.hash) {
       const id = window.location.hash.substring(1)
       updateActiveLink(id)
-    }
-    
-    // If no hash, highlight the first heading by default
-    else if (headings.length > 0 && headings[0].id) {
+    } else if (headings.length > 0 && headings[0].id) {
+      // Si no hay hash, resaltar el primer encabezado por defecto
       updateActiveLink(headings[0].id)
     }
-    
-    // Add scroll listener to handle rapid scrolling
-    let scrollTimeout;
-    let lastScrollTop = 0;
-    let scrollDirection = 0;  // 0 = no scroll, 1 = scrolling down, -1 = scrolling up
-    
-    window.addEventListener('scroll', () => {
-      const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      
-      // Determine scroll direction
-      const newDirection = scrollTop > lastScrollTop ? 1 : -1;
-      
-      // If direction changed, might need to reset visible headings
-      if (scrollDirection !== 0 && newDirection !== scrollDirection) {
-        visibleHeadingIds = [];
-      }
-      
-      scrollDirection = newDirection;
-      lastScrollTop = scrollTop;
-      
-      // Clear previous timeout
-      clearTimeout(scrollTimeout);
-      
-      // Set new timeout - after scrolling stops for 100ms, scan for visible headings
-      scrollTimeout = setTimeout(() => {
-        // Only process if we're not in a period right after a manual click
-        if (!lastManualSelection || Date.now() - manualSelectionTimestamp > 1000) {
-          // Reset direction to "no scroll"
-          scrollDirection = 0;
-          
-          // Trigger a check for visible headings if none are currently tracked
-          if (visibleHeadingIds.length === 0) {
-            // Find the closest heading to the viewport
-            const sortedHeadings = [...headings].sort((a, b) => {
-              const aRect = a.getBoundingClientRect();
-              const bRect = b.getBoundingClientRect();
-              return Math.abs(aRect.top - headerHeight) - Math.abs(bRect.top - headerHeight);
-            });
-            
-            if (sortedHeadings.length > 0 && sortedHeadings[0].id) {
-              updateActiveLink(sortedHeadings[0].id);
-            }
-          }
-        }
-      }, 100);
-    }, { passive: true });
   }
 
-  // Set up on page load and after transitions
+  // Configurar al cargar la página y después de transiciones
   document.addEventListener('astro:page-load', setupToc)
   document.addEventListener('astro:after-swap', setupToc)
 </script>
