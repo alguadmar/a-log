@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from 'react'
+import { useState, useEffect, memo, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -13,31 +13,36 @@ import { Menu } from 'lucide-react'
 const MobileMenu = memo(() => {
   const [isOpen, setIsOpen] = useState(false)
 
-  useEffect(() => {
-    const handleViewTransitionStart = () => {
-      setIsOpen(false)
-    }
+  // Memoized handler functions to prevent recreation on each render
+  const handleViewTransitionStart = useCallback(() => {
+    setIsOpen(false)
+  }, [])
 
+  const handleScroll = useCallback(() => {
+    if (isOpen) setIsOpen(false)
+  }, [isOpen])
+
+  useEffect(() => {
     // Close menu on page navigation
     document.addEventListener('astro:before-swap', handleViewTransitionStart)
 
     // Also close menu when user scrolls (improves mobile UX)
-    const handleScroll = () => {
-      if (isOpen) setIsOpen(false)
-    }
-    
     window.addEventListener('scroll', handleScroll, { passive: true })
 
     return () => {
       document.removeEventListener('astro:before-swap', handleViewTransitionStart)
       window.removeEventListener('scroll', handleScroll)
     }
-  }, [isOpen])
+  }, [handleViewTransitionStart, handleScroll])
 
-  // Memoized click handler to prevent recreating on each render
-  const handleButtonClick = () => {
+  // Memoized click handlers to prevent recreating on each render
+  const handleButtonClick = useCallback(() => {
     setIsOpen((val) => !val)
-  }
+  }, [])
+
+  const handleItemClick = useCallback(() => {
+    setIsOpen(false)
+  }, [])
 
   // Optimized menu item rendering
   const menuItems = NAV_LINKS.map((item) => (
@@ -45,7 +50,7 @@ const MobileMenu = memo(() => {
       <a
         href={item.href}
         className="w-full text-lg font-medium capitalize"
-        onClick={() => setIsOpen(false)}
+        onClick={handleItemClick}
       >
         {item.label}
       </a>

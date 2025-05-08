@@ -66,18 +66,21 @@ import { Icon } from 'astro-icon/components'
     if (newTheme === 'dark') {
       element.classList.add('dark');
       
-      // Aplicar estilos para dark mode inmediatamente
+      // Evitamos manipular DOM innecesariamente verificando si el estilo ya existe
       if (!document.getElementById('theme-icons-fix')) {
-        document.head.insertAdjacentHTML('beforeend', 
-          `<style id="theme-icons-fix">
-            /* Estilos inmediatos para dark mode */
-            :root.dark [data-icon="lucide:sun"] { opacity: 0 !important; transform: scale(0) rotate(-90deg) !important; }
-            :root.dark [data-icon="lucide:moon"] { opacity: 1 !important; transform: scale(1) rotate(0) !important; }
-            :root.dark .dark\\:hidden { display: none !important; }
-            :root.dark .hidden.dark\\:block { display: block !important; }
-            :root.dark img[class*="dark:hidden"] { display: none !important; }
-            :root.dark img[class*="hidden"][class*="dark:block"] { display: block !important; }
-          </style>`);
+        // Crear el elemento de estilo una sola vez y guardarlo para reutilizar
+        const styleEl = document.createElement('style');
+        styleEl.id = 'theme-icons-fix';
+        styleEl.textContent = `
+          /* Estilos inmediatos para dark mode */
+          :root.dark [data-icon="lucide:sun"] { opacity: 0 !important; transform: scale(0) rotate(-90deg) !important; }
+          :root.dark [data-icon="lucide:moon"] { opacity: 1 !important; transform: scale(1) rotate(0) !important; }
+          :root.dark .dark\\:hidden { display: none !important; }
+          :root.dark .hidden.dark\\:block { display: block !important; }
+          :root.dark img[class*="dark:hidden"] { display: none !important; }
+          :root.dark img[class*="hidden"][class*="dark:block"] { display: block !important; }
+        `;
+        document.head.appendChild(styleEl);
       }
     } else {
       element.classList.remove('dark');
@@ -103,36 +106,37 @@ import { Icon } from 'astro-icon/components'
   // Initialize on page load
   initThemeToggle()
 
-  // Handle view transitions
+  // Handle view transitions - optimizado para evitar trabajo DOM redundante
   document.addEventListener('astro:after-swap', () => {
-    // Usando función inmediata para evitar conflictos de variables
-    (function() {
-      const storedTheme = localStorage.getItem('theme')
-      const element = document.documentElement
+    // Función optimizada para evitar recrear elementos innecesariamente
+    const storedTheme = localStorage.getItem('theme')
+    const element = document.documentElement
+    
+    // Aplicar el tema directamente sin transiciones
+    if (storedTheme === 'dark') {
+      element.classList.add('dark')
       
-      // Aplicar el tema directamente sin transiciones
-      if (storedTheme === 'dark') {
-        element.classList.add('dark')
+      // Evitar crear el elemento si ya existe
+      if (!document.getElementById('theme-icons-fix')) {
+        // Usar createElement para mejor rendimiento que insertAdjacentHTML
+        const styleEl = document.createElement('style');
+        styleEl.id = 'theme-icons-fix';
+        // Texto precompilado para evitar concatenaciones
+        styleEl.textContent = 
+          ':root.dark [data-icon="lucide:sun"]{opacity:0!important;transform:scale(0) rotate(-90deg)!important}' +
+          ':root.dark [data-icon="lucide:moon"]{opacity:1!important;transform:scale(1) rotate(0)!important}' +
+          ':root.dark .dark\\:hidden{display:none!important}' +
+          ':root.dark .hidden.dark\\:block{display:block!important}' +
+          ':root.dark img[class*="dark:hidden"]{display:none!important}' +
+          ':root.dark img[class*="hidden"][class*="dark:block"]{display:block!important}';
         
-        // Aplicar estilos para dark mode inmediatamente
-        if (!document.getElementById('theme-icons-fix')) {
-          document.head.insertAdjacentHTML('beforeend', 
-            `<style id="theme-icons-fix">
-              /* Estilos inmediatos para dark mode */
-              :root.dark [data-icon="lucide:sun"] { opacity: 0 !important; transform: scale(0) rotate(-90deg) !important; }
-              :root.dark [data-icon="lucide:moon"] { opacity: 1 !important; transform: scale(1) rotate(0) !important; }
-              :root.dark .dark\\:hidden { display: none !important; }
-              :root.dark .hidden.dark\\:block { display: block !important; }
-              :root.dark img[class*="dark:hidden"] { display: none !important; }
-              :root.dark img[class*="hidden"][class*="dark:block"] { display: block !important; }
-            </style>`);
-        }
-      } else {
-        element.classList.remove('dark')
-        const iconFix = document.getElementById('theme-icons-fix');
-        if (iconFix) iconFix.remove();
+        document.head.appendChild(styleEl);
       }
-    })();
+    } else {
+      element.classList.remove('dark')
+      const iconFix = document.getElementById('theme-icons-fix');
+      if (iconFix) iconFix.remove();
+    }
 
     // Reinicializar el botón de tema
     initThemeToggle()

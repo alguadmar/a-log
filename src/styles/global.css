@@ -5,26 +5,9 @@
 /* Add transition for background and text colors */
 :root {
   --transition-duration: 0.05s;
-  --animation-duration: 150ms;
-  --animation-timing: ease-out;
 }
 
-/* JetBrains Mono */
-@font-face {
-  font-family: 'JetBrains Mono';
-  src: url('/fonts/JetBrainsMono[wght].woff2') format('woff2-variations');
-  font-weight: 100 800;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'JetBrains Mono';
-  src: url('/fonts/JetBrainsMono-Italic[wght].woff2') format('woff2-variations');
-  font-weight: 100 800;
-  font-style: italic;
-  font-display: swap;
-}
+/* Fuentes cargadas de forma asíncrona mediante JavaScript */
 
 /* Variables CSS */
 :root {
@@ -93,35 +76,6 @@
 }
 
 @layer base {
-  /* Fadein animation for view transitions */
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  @keyframes fade-out {
-    from { opacity: 1; }
-    to { opacity: 0; }
-  }
-
-  @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  @media (prefers-reduced-motion: no-preference) {
-    ::view-transition-group(root) {
-      animation-duration: 0.15s;
-    }
-    
-    ::view-transition-old(root) {
-      animation: 0.15s cubic-bezier(0.4, 0, 0.2, 1) both fade-out;
-    }
-    
-    ::view-transition-new(root) {
-      animation: 0.15s cubic-bezier(0.4, 0, 0.2, 1) both fade-in;
-    }
-  }
 
   html {
     @apply bg-background text-foreground font-sans;
@@ -144,6 +98,13 @@
   ::before,
   ::after {
     @apply border-border outline-ring/50 tracking-tight;
+  }
+  
+  /* Solo aplicar transiciones a elementos específicos */
+  a, 
+  button, 
+  .theme-toggle, 
+  .transition-colors {
     transition: background-color var(--transition-duration) ease-in-out, 
                 border-color var(--transition-duration) ease-in-out,
                 color var(--transition-duration) ease-in-out;

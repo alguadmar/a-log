@@ -6,6 +6,7 @@ import Head from '@/components/Head.astro'
 import Header from '@/components/Header.astro'
 import { SITE } from '@/consts'
 import { cn } from '@/lib/utils'
+import { initFastNavigation } from '@/head.js'
 
 const { isWide = false } = Astro.props
 ---
@@ -13,20 +14,8 @@ const { isWide = false } = Astro.props
 <!doctype html>
 <html lang={SITE.locale} class="color-scheme-unset">
   <Head>
-    <!-- Preload critical assets -->
-    <link rel="preload" href="/fonts/JetBrainsMono[wght].woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/fonts/GeistVF.woff2" as="font" type="font/woff2" crossorigin>
+    <!-- Preconectar con dominios utilizados -->
     <link rel="preconnect" href="https://a-log-production.up.railway.app" crossorigin>
-    <meta name="view-transition" content="same-origin">
-    
-    <!-- Optimización de CSS para navegadores antiguos -->
-    <style is:inline>
-      @supports not (contain: paint) {
-        /* Fallback para navegadores que no soportan view transitions */
-        .page-content { animation: fadeIn 0.15s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-      }
-    </style>
     
     <slot name="head" />
   </Head>
@@ -36,10 +25,9 @@ const { isWide = false } = Astro.props
       <main class="grow">
         <div
           class={cn(
-            'mx-auto flex grow flex-col gap-y-6 px-4 page-content',
+            'mx-auto flex grow flex-col gap-y-6 px-4',
             !isWide && 'max-w-3xl',
           )}
-          transition:animate="fade"
         >
           <slot />
         </div>
@@ -47,7 +35,70 @@ const { isWide = false } = Astro.props
       <Footer />
     </div>
 
-    <!-- Preconnect to likely domains -->
+    <!-- Preload resources and connect to likely domains -->
     <link rel="preconnect" href="https://a-log-production.up.railway.app">
+    <script is:inline>
+      // Este script ayuda a acelerar la navegación preparando los enlaces y la navegación
+      document.addEventListener('DOMContentLoaded', () => {
+        // Caché para evitar prefetch repetido de enlaces
+        const prefetchedLinks = new Set();
+        
+        // Función para detectar enlaces marcados para prefetch
+        const prefetchLinks = (e) => {
+          // Solo prefetch enlaces con atributo data-prefetch
+          if (e.target.tagName === 'A' && 
+              e.target.hasAttribute('data-prefetch') && 
+              e.target.href &&
+              e.target.href.startsWith(window.location.origin) &&
+              !prefetchedLinks.has(e.target.href)) {
+                
+            // Evitar prefetch en conexiones lentas o modo ahorro de datos
+            if (navigator.connection && 
+                (navigator.connection.saveData || 
+                 (navigator.connection.effectiveType && 
+                  navigator.connection.effectiveType.includes('2g')))) {
+              return;
+            }
+            
+            // Añadir a caché para evitar repeticiones
+            prefetchedLinks.add(e.target.href);
+            
+            // Realizar el prefetch
+            fetch(e.target.href, { 
+              method: 'GET', 
+              credentials: 'same-origin',
+              priority: 'low'
+            });
+          }
+        };
+        
+        // Interceptar clics en enlaces para actualizar URL inmediatamente
+        document.addEventListener('click', (e) => {
+          // No interceptar clics con modificadores o enlaces especiales
+          if (e.target.tagName === 'A' && 
+              !e.target.closest('[data-no-instant]') &&
+              !e.target.getAttribute('target') &&
+              e.target.href && 
+              e.target.href.startsWith(window.location.origin) &&
+              !e.target.href.startsWith(window.location.origin + '#') &&
+              !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+            
+            // Prevenir comportamiento por defecto
+            e.preventDefault();
+            
+            // Actualizar la URL inmediatamente para feedback visual
+            window.history.pushState({}, '', e.target.href);
+            
+            // Iniciar la navegación real
+            fetch(e.target.href, {priority: 'high'})
+              .then(() => { window.location.href = e.target.href; })
+              .catch(() => { window.location.href = e.target.href; });
+          }
+        });
+        
+        // Escuchar eventos con captura pasiva para mejor rendimiento
+        document.addEventListener('mouseover', prefetchLinks, { passive: true });
+      });
+    </script>
   </body>
 </html>

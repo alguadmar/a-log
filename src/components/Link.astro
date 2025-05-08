@@ -16,11 +16,13 @@ const { href, external, class: className, underline, ...rest } = Astro.props
   href={href}
   target={external ? '_blank' : '_self'}
   class={cn(
-    'inline-block transition-colors duration-300 ease-in-out',
+    'inline-block transition-colors',
     underline &&
       'underline decoration-muted-foreground underline-offset-[3px] hover:decoration-foreground',
     className,
   )}
+  rel={external ? 'noopener noreferrer' : undefined}
+  {...!external && !href.startsWith('#') && !href.startsWith('mailto:') && { 'data-prefetch': true }}
   {...rest}
 >
   <slot />

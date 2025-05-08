@@ -23,16 +23,9 @@ import tailwindcss from '@astrojs/tailwind'
 export default defineConfig({
   site: 'https://a-log.ink',
   output: 'static',
+  compressHTML: true,
   build: {
     inlineStylesheets: 'auto',
-  },
-  prefetch: {
-    prefetchAll: true,
-    defaultStrategy: 'hover'
-  },
-  transitions: {
-    persist: ['header', '.theme-toggle'],
-    animation: 'fade'
   },
   integrations: [
     expressiveCode({
@@ -91,6 +84,13 @@ export default defineConfig({
     },
     build: {
       cssCodeSplit: false,
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: true,
+          ecma: 2020
+        }
+      },
       rollupOptions: {
         output: {
           manualChunks: {

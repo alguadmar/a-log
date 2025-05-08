@@ -7,7 +7,6 @@ import { NAV_LINKS, SITE } from '@/consts'
 
 <header
   class="bg-background/50 sticky top-0 z-10 backdrop-blur-md"
-  transition:persist
 >
   <div
     class="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-4 p-4"
@@ -44,8 +43,8 @@ import { NAV_LINKS, SITE } from '@/consts'
           ))
         }
       </nav>
-      <MobileMenu client:idle transition:persist />
-      <ThemeToggle transition:persist />
+      <MobileMenu client:load />
+      <ThemeToggle />
     </div>
   </div>
 </header>
