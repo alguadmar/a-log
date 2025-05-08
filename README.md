@@ -55,7 +55,7 @@ npm run dev
 
 ## Despliegue
 
-El sitio está desplegado en [Vercel](https://a-log.vercel.app).
+El sitio está desplegado en [Railway].
 
 ## Estructura del proyecto
 
