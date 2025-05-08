@@ -46,7 +46,7 @@ const hasProjects = projects.length > 0
   />
 
   <div class="flex flex-wrap items-center gap-2">
-    <h1 class="text-3xl font-medium">Contenido etiquetado con</h1>
+    <h1 class="text-3xl font-medium leading-relaxed">Contenido etiquetado con</h1>
     <span
       class="bg-secondary flex items-center gap-x-1 rounded-full px-4 py-2 text-2xl font-medium"
     >
@@ -56,7 +56,7 @@ const hasProjects = projects.length > 0
 
   {hasProjects && (
     <section class="mt-8">
-      <h2 class="text-2xl font-medium mb-4">Proyectos</h2>
+      <h2 class="text-2xl font-medium mb-4 leading-relaxed">Proyectos</h2>
       <ul class="flex flex-col gap-y-4">
         {projects.map((project) => (
           <li>
@@ -69,7 +69,7 @@ const hasProjects = projects.length > 0
 
   {hasPosts && (
     <section class="mt-8">
-      <h2 class="text-2xl font-medium mb-4">Posts</h2>
+      <h2 class="text-2xl font-medium mb-4 leading-relaxed">Posts</h2>
       <ul class="flex flex-col gap-y-4">
         {posts.map((post) => (
           <li>

@@ -62,11 +62,11 @@ const readTimeText = readingTime(post.body!)
     )}
 
     <section class="col-start-2 flex flex-col gap-y-6 text-center">
-      <h1 class="text-pretty text-3xl font-bold tracking-tight sm:text-4xl">
+      <h1 class="text-pretty text-3xl font-bold tracking-tight leading-relaxed sm:text-4xl sm:leading-relaxed">
         {post.data.title}
       </h1>
 
-      <div class="flex flex-wrap items-center justify-center gap-2 text-sm text-muted-foreground">
+      <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-3 text-sm text-muted-foreground">
         {authors.length > 0 && (
           <>
             <div class="flex items-center gap-x-2">
@@ -75,8 +75,8 @@ const readTimeText = readingTime(post.body!)
                   <Image
                     src={author.avatar}
                     alt={author.name}
-                    width={24}
-                    height={24}
+                    width={32}
+                    height={32}
                     class="rounded-full"
                   />
                   {author.isRegistered ? (
@@ -89,17 +89,20 @@ const readTimeText = readingTime(post.body!)
                 </div>
               ))}
             </div>
-            <Separator orientation="vertical" className="h-4" />
+            <Separator orientation="vertical" className="hidden h-4 sm:block" />
+            <Separator className="block w-full my-2 sm:hidden" />
           </>
         )}
         <span>{formatDate(post.data.date)}</span>
-        <Separator orientation="vertical" className="h-4" />
+        <Separator orientation="vertical" className="hidden h-4 sm:block" />
+        <Separator className="block w-full my-2 sm:hidden" />
         <span>{readTimeText}</span>
         
         {/* Enlace al proyecto si este post pertenece a uno */}
         {associatedProject && (
           <>
-            <Separator orientation="vertical" className="h-4" />
+            <Separator orientation="vertical" className="hidden h-4 sm:block" />
+            <Separator className="block w-full my-2 sm:hidden" />
             <div class="flex items-center gap-x-1.5 text-foreground">
               <span>Parte de:</span>
               <ProjectLink project={associatedProject} className="text-foreground" />
@@ -108,7 +111,7 @@ const readTimeText = readingTime(post.body!)
         )}
       </div>
 
-      <div class="flex flex-wrap justify-center gap-2">
+      <div class="flex flex-wrap justify-center gap-2 mt-2">
         {post.data.tags?.length > 0 ? (
           post.data.tags.map((tag) => (
             <a href={`/tags/${tag}`} class={badgeVariants({ variant: 'secondary' })}>
@@ -121,10 +124,8 @@ const readTimeText = readingTime(post.body!)
         )}
       </div>
 
-      <PostNavigation prevPost={prevPost} nextPost={nextPost} />
-
       {headings.length > 0 && (
-        <div class=" block w-full lg:hidden">
+        <div class="block w-full lg:hidden">
           <TableOfContents headings={headings} enableScrollSpy />
         </div>
       )}
@@ -138,7 +139,9 @@ const readTimeText = readingTime(post.body!)
 
     <article class="prose col-start-2 max-w-none prose-invert">
       <Content />
-      <PostNavigation prevPost={prevPost} nextPost={nextPost} />
+      <div class="not-prose prose-a:no-underline mt-12">
+        <PostNavigation prevPost={prevPost} nextPost={nextPost} />
+      </div>
     </article>
   </section>
 

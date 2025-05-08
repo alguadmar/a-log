@@ -38,8 +38,8 @@ const prevUrl = getPostUrl(prevPost);
     href={nextUrl}
     class={cn(
       buttonVariants({ variant: 'outline' }),
-      'rounded-xl group flex items-center justify-start size-full',
-      !nextPost && 'pointer-events-none opacity-50 cursor-not-allowed',
+      'rounded-xl group flex items-center justify-start size-full no-underline',
+      !nextPost && 'pointer-events-none opacity-50 duration-300',
     )}
     aria-disabled={!nextPost}
   >
@@ -58,14 +58,13 @@ const prevUrl = getPostUrl(prevPost);
     href={prevUrl}
     class={cn(
       buttonVariants({ variant: 'outline' }),
-      'rounded-xl group flex items-center justify-end size-full',
+      'rounded-xl group flex items-center justify-end size-full no-underline',
       !prevPost && 'pointer-events-none opacity-50 cursor-not-allowed',
     )}
     aria-disabled={!prevPost}
   >
     <div class="flex flex-col items-end overflow-hidden text-wrap">
-      <span class="text-muted-foreground text-right text-xs">{prevLabel}</span
-      >
+      <span class="text-muted-foreground text-right text-xs">{prevLabel}</span>
       <span class="w-full text-right text-sm text-ellipsis">
         {prevPost?.data.title || prevEmptyText}
       </span>

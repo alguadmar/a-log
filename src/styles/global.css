@@ -4,7 +4,7 @@
 
 /* Add transition for background and text colors */
 :root {
-  --transition-duration: 0.05s;
+  --transition-duration: 0.15s;
 }
 
 
@@ -100,9 +100,11 @@
     color-scheme: light dark;
   }
 
-  html.disable-transitions,
-  html.color-scheme-unset,
-  html.color-scheme-unset * {
+  html.disable-transitions * {
+    transition: none !important;
+  }
+  
+  html.color-scheme-unset {
     transition: none !important;
   }
 
@@ -124,7 +126,17 @@
   .transition-colors {
     transition: background-color var(--transition-duration) ease-in-out,
       border-color var(--transition-duration) ease-in-out,
-      color var(--transition-duration) ease-in-out;
+      color var(--transition-duration) ease-in-out,
+      transform 0.2s ease-in-out;
+  }
+  
+  .group:hover .group-hover\:-translate-x-1,
+  .group:hover .group-hover\:translate-x-1 {
+    transition: transform 0.2s ease-in-out;
+  }
+  
+  .hover\:scale-105:hover {
+    transition: transform 0.2s ease-in-out;
   }
 }
 
@@ -137,27 +149,27 @@
     }
 
     h1 {
-      @apply text-foreground mb-6 scroll-m-20 text-4xl leading-5 font-medium;
+      @apply text-foreground mb-6 scroll-m-20 text-4xl leading-normal font-medium;
     }
 
     h2 {
-      @apply text-foreground mt-8 mb-4 scroll-m-20 text-2xl leading-5 font-medium;
+      @apply text-foreground mt-8 mb-4 scroll-m-20 text-2xl leading-relaxed font-medium;
     }
 
     h3 {
-      @apply text-foreground mt-6 mb-4 scroll-m-20 text-xl leading-6 font-medium;
+      @apply text-foreground mt-6 mb-4 scroll-m-20 text-xl leading-relaxed font-medium;
     }
 
     h4 {
-      @apply text-foreground mt-6 mb-3 scroll-m-20 text-lg leading-6 font-medium;
+      @apply text-foreground mt-6 mb-3 scroll-m-20 text-lg leading-relaxed font-medium;
     }
 
     h5 {
-      @apply text-foreground mt-5 mb-3 scroll-m-20 leading-6 font-medium;
+      @apply text-foreground mt-5 mb-3 scroll-m-20 leading-relaxed font-medium;
     }
 
     h6 {
-      @apply text-foreground mt-5 mb-3 scroll-m-20 leading-6 font-medium;
+      @apply text-foreground mt-5 mb-3 scroll-m-20 leading-relaxed font-medium;
     }
 
     a {

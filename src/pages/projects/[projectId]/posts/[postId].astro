@@ -91,11 +91,11 @@ const postIndex = relatedPosts.findIndex(p => p.id === postId);
     )}
 
     <section class="col-start-2 flex flex-col gap-y-6 text-center">
-      <h1 class="text-pretty text-3xl font-bold tracking-tight sm:text-4xl">
+      <h1 class="text-pretty text-3xl font-bold tracking-tight leading-relaxed sm:text-4xl sm:leading-relaxed">
         {post.data.title}
       </h1>
 
-      <div class="flex flex-wrap items-center justify-center gap-2 text-sm text-muted-foreground">
+      <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-3 text-sm text-muted-foreground">
         {authors.length > 0 && (
           <>
             <div class="flex items-center gap-x-2">
@@ -104,8 +104,8 @@ const postIndex = relatedPosts.findIndex(p => p.id === postId);
                   <Image
                     src={author.avatar}
                     alt={author.name}
-                    width={24}
-                    height={24}
+                    width={32}
+                    height={32}
                     class="rounded-full"
                   />
                   {author.isRegistered ? (
@@ -118,17 +118,20 @@ const postIndex = relatedPosts.findIndex(p => p.id === postId);
                 </div>
               ))}
             </div>
-            <Separator orientation="vertical" className="h-4" />
+            <Separator orientation="vertical" className="hidden h-4 sm:block" />
+            <Separator className="block w-full my-2 sm:hidden" />
           </>
         )}
         <span>{formatDate(post.data.date)}</span>
-        <Separator orientation="vertical" className="h-4" />
+        <Separator orientation="vertical" className="hidden h-4 sm:block" />
+        <Separator className="block w-full my-2 sm:hidden" />
         <span>{readTimeText}</span>
         
         {/* Indicador de progreso en la serie */}
         {postIndex !== -1 && (
           <>
-            <Separator orientation="vertical" className="h-4" />
+            <Separator orientation="vertical" className="hidden h-4 sm:block" />
+            <Separator className="block w-full my-2 sm:hidden" />
             <div class="flex items-center gap-x-1.5">
               <Icon name="lucide:list-ordered" class="size-4" />
               <span>{postIndex + 1} de {relatedPosts.length} en esta serie</span>
@@ -137,7 +140,7 @@ const postIndex = relatedPosts.findIndex(p => p.id === postId);
         )}
       </div>
 
-      <div class="flex flex-wrap justify-center gap-2">
+      <div class="flex flex-wrap justify-center gap-2 mt-2">
         {post.data.tags?.length > 0 ? (
           post.data.tags.map((tag) => (
             <a href={`/tags/${tag}`} class={badgeVariants({ variant: 'secondary' })}>
@@ -148,17 +151,6 @@ const postIndex = relatedPosts.findIndex(p => p.id === postId);
         ) : (
           <span class="text-sm text-muted-foreground">No tags available</span>
         )}
-      </div>
-
-      {/* Navegación entre posts del proyecto */}
-      <div class="w-full">
-        <PostNavigation 
-          prevPost={prevPost} 
-          nextPost={nextPost} 
-          urlPrefix={`/projects/${projectId}/posts/`}
-          prevLabel="Siguiente en este proyecto"
-          nextLabel="Anterior en este proyecto"
-        />
       </div>
 
       {headings.length > 0 && (
@@ -227,7 +219,7 @@ const postIndex = relatedPosts.findIndex(p => p.id === postId);
       <Content />
       
       {/* Navegación entre posts del proyecto al final */}
-      <div class="mt-10">
+      <div class="not-prose prose-a:no-underline mt-12">
         <PostNavigation 
           prevPost={prevPost} 
           nextPost={nextPost} 

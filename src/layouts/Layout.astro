@@ -19,6 +19,16 @@ const { isWide = false } = Astro.props
     <link rel="preconnect" href="https://a-log-production.up.railway.app" crossorigin>
     
     <slot name="head" />
+    
+    <!-- Asegurar que las transiciones funcionen correctamente desde el inicio -->
+    <script is:inline>
+      document.addEventListener('astro:page-load', () => {
+        // Forzar una actualización del DOM para que las transiciones se apliquen correctamente
+        setTimeout(() => {
+          document.documentElement.classList.remove('disable-transitions');
+        }, 10);
+      });
+    </script>
   </Head>
   <body>
     <div class="flex h-fit min-h-screen flex-col gap-y-6 font-sans">

@@ -14,21 +14,21 @@ const { project } = Astro.props
 ---
 
 <div
-  class="hover:bg-secondary/50 rounded-xl border p-4 transition-colors duration-300 ease-in-out"
+  class="hover:bg-secondary/50 rounded-xl border p-4 transition-all"
 >
   <div class="flex flex-col gap-6 sm:flex-row">
     {
       project.data.image && (
         <Link
           href={`/projects/${project.id}`}
-          class="w-full sm:w-[250px] h-[150px] overflow-hidden rounded-md bg-muted sm:shrink-0"
+          class="relative h-48 w-full overflow-hidden rounded-md bg-muted sm:h-36 sm:w-[250px] sm:shrink-0"
         >
           <Image
             src={project.data.image}
             alt={project.data.name}
             width={250}
             height={150}
-            class="h-full w-full object-cover transition-transform hover:scale-105"
+            class="absolute inset-0 h-full w-full object-cover transition-transform hover:scale-105"
             loading="lazy"
           />
         </Link>
@@ -47,10 +47,10 @@ const { project } = Astro.props
       </div>
       {
         project.data.startDate && (
-          <p class="text-muted-foreground/70 mb-2 flex items-center gap-x-1.5 text-xs">
-            <span class="flex items-center gap-x-1.5">
-              <Icon name="lucide:calendar" class="size-3" />
-              <span>
+          <p class="text-muted-foreground/70 mb-2 flex items-center gap-x-1 text-[0.65rem] xs:text-xs">
+            <span class="flex items-center gap-x-1 xs:gap-x-1.5">
+              <Icon name="lucide:calendar" class="size-2.5 xs:size-3" />
+              <span class="whitespace-nowrap">
                 {formatDate(project.data.startDate)}
                 {project.data.endDate
                   ? ` → ${formatDate(project.data.endDate)}`
@@ -65,9 +65,9 @@ const { project } = Astro.props
           <div class="flex flex-wrap gap-2 mt-auto">
             {project.data.tags.map((tag: string) => (
               <Link href={`/tags/${tag}`} class="hover:opacity-80 transition-opacity">
-                <Badge variant="secondary" className="text-xs">
-                  <Icon name="lucide:hash" class="size-3 mr-0.5" />
-                  {tag}
+                <Badge variant="secondary" className="text-[0.65rem] xs:text-xs">
+                  <Icon name="lucide:hash" class="size-2.5 xs:size-3 mr-0.5" />
+                  <span class="truncate max-w-[60px] xs:max-w-none">{tag}</span>
                 </Badge>
               </Link>
             ))}
