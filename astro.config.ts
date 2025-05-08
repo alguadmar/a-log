@@ -75,7 +75,7 @@ export default defineConfig({
     react(),
     sitemap(),
     icon(),
-    tailwindcss(),
+    tailwindcss({ applyBaseStyles: false }),
   ],
   vite: {
     plugins: [tailwindcss()],

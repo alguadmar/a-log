@@ -7,22 +7,6 @@
   --transition-duration: 0.05s;
 }
 
-/* JetBrains Mono */
-@font-face {
-  font-family: 'JetBrains Mono';
-  src: url('/fonts/JetBrainsMono[wght].woff2') format('woff2-variations');
-  font-weight: 100 800;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'JetBrains Mono';
-  src: url('/fonts/JetBrainsMono-Italic[wght].woff2') format('woff2-variations');
-  font-weight: 100 800;
-  font-style: italic;
-  font-display: swap;
-}
 
 /* Variables CSS */
 :root {
@@ -92,6 +76,24 @@
 
 @layer base {
 
+
+  /* JetBrains Mono */
+  @font-face {
+    font-family: 'JetBrains Mono';
+    src: url('/fonts/JetBrainsMono[wght].woff2') format('woff2-variations');
+    font-weight: 100 800;
+    font-style: normal;
+    font-display: block;
+  }
+
+  @font-face {
+    font-family: 'JetBrains Mono';
+    src: url('/fonts/JetBrainsMono-Italic[wght].woff2') format('woff2-variations');
+    font-weight: 100 800;
+    font-style: italic;
+    font-display: block;
+  }
+
   html {
     @apply bg-background text-foreground font-sans;
     /* Add color-scheme to properly handle system colors */
@@ -114,15 +116,15 @@
   ::after {
     @apply border-border outline-ring/50 tracking-tight;
   }
-  
+
   /* Solo aplicar transiciones a elementos específicos */
-  a, 
-  button, 
-  .theme-toggle, 
+  a,
+  button,
+  .theme-toggle,
   .transition-colors {
-    transition: background-color var(--transition-duration) ease-in-out, 
-                border-color var(--transition-duration) ease-in-out,
-                color var(--transition-duration) ease-in-out;
+    transition: background-color var(--transition-duration) ease-in-out,
+      border-color var(--transition-duration) ease-in-out,
+      color var(--transition-duration) ease-in-out;
   }
 }
 
