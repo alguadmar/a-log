@@ -13,6 +13,8 @@ const { isWide = false } = Astro.props
 <!doctype html>
 <html lang={SITE.locale} class="color-scheme-unset">
   <Head>
+    <!-- Preload critical assets -->
+    <link rel="preload" href="/fonts/JetBrainsMono[wght].woff2" as="font" type="font/woff2" crossorigin>
     <slot name="head" />
   </Head>
   <body>
@@ -30,5 +32,8 @@ const { isWide = false } = Astro.props
       </main>
       <Footer />
     </div>
+
+    <!-- Preconnect to likely domains -->
+    <link rel="preconnect" href="https://a-log-production.up.railway.app">
   </body>
 </html>

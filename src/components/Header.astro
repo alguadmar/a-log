@@ -3,7 +3,6 @@ import Link from '@/components/Link.astro'
 import ThemeToggle from '@/components/ThemeToggle.astro'
 import MobileMenu from '@/components/ui/mobile-menu'
 import { NAV_LINKS, SITE } from '@/consts'
-import { Image } from 'astro:assets'
 ---
 
 <header
@@ -15,12 +14,25 @@ import { Image } from 'astro:assets'
   >
     <Link href="/" class="flex shrink-0 items-center gap-2 text-xl font-medium relative">
       <div class="size-10 overflow-hidden">
-        <img src="/static/log.webp" alt="Logo" class="size-10 absolute inset-0 dark:hidden" />
-        <img src="/static/log-dark.webp" alt="Logo darkmode" class="size-10 absolute inset-0 hidden dark:block" />
+        <img 
+          src="/static/log.webp" 
+          alt="Logo" 
+          width="40" 
+          height="40" 
+          fetchpriority="high"
+          class="size-10 absolute inset-0 dark:hidden" 
+        />
+        <img 
+          src="/static/log-dark.webp" 
+          alt="Logo darkmode" 
+          width="40" 
+          height="40"
+          class="size-10 absolute inset-0 hidden dark:block" 
+        />
       </div>
     </Link>
     <div class="flex items-center gap-2 md:gap-4">
-      <nav class="hidden items-center gap-4 text-sm  sm:gap-6 md:flex">
+      <nav class="hidden items-center gap-4 text-sm sm:gap-6 md:flex">
         {
           NAV_LINKS.map((item) => (
             <Link
@@ -32,7 +44,7 @@ import { Image } from 'astro:assets'
           ))
         }
       </nav>
-      <MobileMenu client:load transition:persist />
+      <MobileMenu client:idle transition:persist />
       <ThemeToggle transition:persist />
     </div>
   </div>

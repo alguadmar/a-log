@@ -21,7 +21,11 @@ import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers'
 import tailwindcss from '@astrojs/tailwind'
 
 export default defineConfig({
-  site: 'https://a-log-production.up.railway.app',
+  site: 'https://a-log.ink',
+  output: 'static',
+  build: {
+    inlineStylesheets: 'auto',
+  },
   integrations: [
     expressiveCode({
       themes: ['github-light', 'github-dark'],
@@ -75,7 +79,21 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
     server: {
-      allowedHosts: ['a-log-production.up.railway.app'],
+      allowedHosts: ['a-log.ink', 'a-log-production.up.railway.app'],
+    },
+    build: {
+      cssCodeSplit: false,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            react: ['react', 'react-dom'],
+            ui: ['@/components/ui'],
+          },
+        },
+      },
+    },
+    optimizeDeps: {
+      include: ['react', 'react-dom'],
     },
   },
   server: {

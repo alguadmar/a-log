@@ -4,7 +4,7 @@ export const SITE: Site = {
   title: 'a-log',
   description:
     'A-log es una bitácora de aprendizaje, un repositorio de escritura libre, un archivo dinámico del pensamiento.',
-  href: 'https://a-log.vercel.app',
+  href: 'https://a-log.ink',
   author: 'alguadmar',
   locale: 'es-MX',
   featuredPostCount: 2,

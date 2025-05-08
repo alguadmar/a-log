@@ -48,41 +48,54 @@ import { Icon } from 'astro-icon/components'
 </script>
 
 <script>
-  function handleToggleClick() {
-    const element = document.documentElement
-
-    // Disable transitions and temporarily pause animations
-    element.classList.add('disable-transitions')
-    element.classList.add('color-scheme-unset')
-    
-    element.classList.toggle('dark')
-
-    // Force a reflow
-    window.getComputedStyle(element).getPropertyValue('opacity')
-
-    // Explicitly set the background color on both html and body
-    const isDark = element.classList.contains('dark')
-    element.style.backgroundColor = isDark ? '#09090b' : '#ffffff';
-    document.body.style.backgroundColor = isDark ? '#09090b' : '#ffffff';
-
-    // Use a small delay to ensure transitions are properly initialized
-    setTimeout(() => {
-      requestAnimationFrame(() => {
-        // Re-enable transitions
-        element.classList.remove('disable-transitions')
-        element.classList.remove('color-scheme-unset')
-        
-        // After transitions are enabled, remove the inline styles to let CSS handle it
-        setTimeout(() => {
-          element.style.backgroundColor = '';
-          document.body.style.backgroundColor = '';
-        }, 100);
-      })
-    }, 50);
-
-    localStorage.setItem('theme', isDark ? 'dark' : 'light')
+  // Use a debounced version of the theme toggle to avoid rapid changes
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
   }
 
+  function handleToggleClick() {
+    const element = document.documentElement
+    
+    // Simplificamos el toggle para hacerlo más directo y rápido
+    const newTheme = element.classList.contains('dark') ? 'light' : 'dark';
+    
+    // Actualizar el localStorage antes para que esté listo cuando se necesite
+    localStorage.setItem('theme', newTheme);
+    
+    // Aplicar colores y clases directamente sin transiciones
+    if (newTheme === 'dark') {
+      element.classList.add('dark');
+      
+      // Aplicar estilos para dark mode inmediatamente
+      if (!document.getElementById('theme-icons-fix')) {
+        document.head.insertAdjacentHTML('beforeend', 
+          `<style id="theme-icons-fix">
+            /* Estilos inmediatos para dark mode */
+            :root.dark [data-icon="lucide:sun"] { opacity: 0 !important; transform: scale(0) rotate(-90deg) !important; }
+            :root.dark [data-icon="lucide:moon"] { opacity: 1 !important; transform: scale(1) rotate(0) !important; }
+            :root.dark .dark\\:hidden { display: none !important; }
+            :root.dark .hidden.dark\\:block { display: block !important; }
+            :root.dark img[class*="dark:hidden"] { display: none !important; }
+            :root.dark img[class*="hidden"][class*="dark:block"] { display: block !important; }
+          </style>`);
+      }
+    } else {
+      element.classList.remove('dark');
+      // Eliminar estilos de dark mode
+      const iconFix = document.getElementById('theme-icons-fix');
+      if (iconFix) iconFix.remove();
+    }
+  }
+
+  // Usamos el handler directo sin debounce para mejorar la respuesta
   function initThemeToggle() {
     const themeToggle = document.getElementById('theme-toggle')
     if (themeToggle) {
@@ -90,75 +103,41 @@ import { Icon } from 'astro-icon/components'
     }
   }
 
+  // Initialize on page load
   initThemeToggle()
 
+  // Handle view transitions
   document.addEventListener('astro:after-swap', () => {
-    // Using closure to avoid potential variable conflicts
+    // Usando función inmediata para evitar conflictos de variables
     (function() {
       const storedTheme = localStorage.getItem('theme')
       const element = document.documentElement
-
-      // Immediately disable transitions
-      element.classList.add('disable-transitions')
-      // Temporarily add color-scheme-unset to ensure animations don't start too early
-      element.classList.add('color-scheme-unset')
-
-      // Force a reflow
-      window.getComputedStyle(element).getPropertyValue('opacity')
-
-      const isDark = storedTheme === 'dark';
       
-      // Explicitly set the background color on both html and body
-      element.style.backgroundColor = isDark ? '#09090b' : '#ffffff';
-      document.body.style.backgroundColor = isDark ? '#09090b' : '#ffffff';
-
-      if (isDark) {
+      // Aplicar el tema directamente sin transiciones
+      if (storedTheme === 'dark') {
         element.classList.add('dark')
         
-        // Fix icon display after navigation
-        const iconFix = document.getElementById('theme-icons-fix');
-        if (!iconFix) {
+        // Aplicar estilos para dark mode inmediatamente
+        if (!document.getElementById('theme-icons-fix')) {
           document.head.insertAdjacentHTML('beforeend', 
             `<style id="theme-icons-fix">
-              /* Theme toggle icons fix */
+              /* Estilos inmediatos para dark mode */
               :root.dark [data-icon="lucide:sun"] { opacity: 0 !important; transform: scale(0) rotate(-90deg) !important; }
               :root.dark [data-icon="lucide:moon"] { opacity: 1 !important; transform: scale(1) rotate(0) !important; }
-              
-              /* Logo and other dark mode elements */
               :root.dark .dark\\:hidden { display: none !important; }
               :root.dark .hidden.dark\\:block { display: block !important; }
-              
-              /* Ensure immediate application of icon classes */
               :root.dark img[class*="dark:hidden"] { display: none !important; }
               :root.dark img[class*="hidden"][class*="dark:block"] { display: block !important; }
             </style>`);
         }
       } else {
         element.classList.remove('dark')
-        // Remove icon fix if exists
         const iconFix = document.getElementById('theme-icons-fix');
-        if (iconFix) {
-          iconFix.remove();
-        }
+        if (iconFix) iconFix.remove();
       }
-
-      // Use a small delay to ensure all transitions are properly initialized
-      setTimeout(() => {
-        requestAnimationFrame(() => {
-          // Remove transition disabling classes
-          element.classList.remove('disable-transitions')
-          element.classList.remove('color-scheme-unset')
-          
-          // After transitions are enabled, remove the inline styles to let CSS handle it
-          setTimeout(() => {
-            element.style.backgroundColor = '';
-            document.body.style.backgroundColor = '';
-          }, 100);
-        })
-      }, 50);
     })();
 
-    // Initialize theme toggle button
+    // Reinicializar el botón de tema
     initThemeToggle()
   })
 </script>

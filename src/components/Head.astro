@@ -7,27 +7,24 @@ import Favicons from './Favicons.astro'
 <head>
   <!-- Preload script to prevent flash of incorrect theme -->
   <script is:inline>
-    // Theme detection and immediate application - using IIFE to avoid global variables
+    // Script optimizado para aplicación inmediata del tema
     (function() {
+      // Determinar el tema (dark/light)
       const themeValue = localStorage?.getItem('theme') || '';
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       const isDark = themeValue === 'dark' || (!themeValue && prefersDark);
       
-      // Apply theme immediately to prevent flash
+      // Aplicar el tema inmediatamente (eliminando todas las transiciones)
       if (isDark) {
         document.documentElement.classList.add('dark');
-        // Add this style tag to prevent icons from flashing
+        // Estilos inmediatos para garantizar que se muestre correctamente
         document.head.insertAdjacentHTML('beforeend', 
           `<style id="theme-icons-fix">
-            /* Theme toggle icons fix */
+            /* Ajustes para el tema oscuro */
             :root.dark [data-icon="lucide:sun"] { opacity: 0 !important; transform: scale(0) rotate(-90deg) !important; }
             :root.dark [data-icon="lucide:moon"] { opacity: 1 !important; transform: scale(1) rotate(0) !important; }
-            
-            /* Logo and other dark mode elements */
             :root.dark .dark\\:hidden { display: none !important; }
             :root.dark .hidden.dark\\:block { display: block !important; }
-            
-            /* Ensure immediate application of icon classes */
             :root.dark img[class*="dark:hidden"] { display: none !important; }
             :root.dark img[class*="hidden"][class*="dark:block"] { display: block !important; }
           </style>`);
@@ -35,31 +32,15 @@ import Favicons from './Favicons.astro'
         document.documentElement.classList.remove('dark');
       }
       
-      // Set background color immediately to prevent flash
-      const bgColor = isDark ? '#09090b' : '#ffffff';
-      document.documentElement.style.backgroundColor = bgColor;
+      // Ajustar colores de fondo para evitar parpadeos
+      document.documentElement.style.backgroundColor = isDark ? '#09090b' : '#ffffff';
       
-      // Set body background color as well (important for theme toggle)
-      if (document.body) {
-        document.body.style.backgroundColor = bgColor;
-      } else {
-        // If body isn't available yet, set it after DOM content loaded
-        document.addEventListener('DOMContentLoaded', () => {
-          document.body.style.backgroundColor = bgColor;
-        });
-      }
-      
-      // Wait for DOM to be ready before enabling transitions
+      // En cuanto el DOM esté listo, dejar que el CSS tome el control
       document.addEventListener('DOMContentLoaded', () => {
-        // Remove the unset class to apply proper transitions
+        document.documentElement.style.backgroundColor = '';
+        if (document.body) document.body.style.backgroundColor = '';
         document.documentElement.classList.remove('color-scheme-unset');
-        
-        // After a delay, remove inline styles to let CSS take over
-        setTimeout(() => {
-          document.documentElement.style.backgroundColor = '';
-          document.body.style.backgroundColor = '';
-        }, 100);
-      });
+      }, { once: true });
     })();
   </script>
 

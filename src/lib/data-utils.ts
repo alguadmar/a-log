@@ -138,12 +138,13 @@ export async function getPostsByProject(
   projectId: string,
 ): Promise<CollectionEntry<'blog'>[]> {
   const posts = await getAllPosts()
-  const project = await getCollection('projects').then(
+  // Obtener solo proyectos publicados (no drafts)
+  const project = await getCollection('projects', (project) => !project.data.draft).then(
     (projects) => projects.find((p) => p.id === projectId)
   )
   
   if (!project || !project.data.relatedPosts || project.data.relatedPosts.length === 0) {
-    console.log(`No relatedPosts found for project ${projectId}`);
+    console.log(`No relatedPosts found for project ${projectId} or project is a draft`);
     return []
   }
   
@@ -184,10 +185,11 @@ export async function getAdjacentProjectPosts(
   prev: CollectionEntry<'blog'> | null
   next: CollectionEntry<'blog'> | null
 }> {
+  // getPostsByProject ya filtra para que solo devuelva posts de proyectos publicados
   const relatedPosts = await getPostsByProject(projectId)
   
   if (relatedPosts.length === 0) {
-    console.log(`No related posts found for project ${projectId}`);
+    console.log(`No related posts found for project ${projectId} or project is a draft`);
     return { prev: null, next: null }
   }
   
@@ -235,8 +237,8 @@ export async function getProjectForPost(
   index: number
   total: number
 }> {
-  // Obtener todos los proyectos
-  const projects = await getCollection('projects')
+  // Obtener todos los proyectos que NO están en borrador
+  const projects = await getCollection('projects', (project) => !project.data.draft)
   
   // Extraer la última parte del ID del post si contiene una barra
   let shortPostId = postId;
@@ -247,7 +249,7 @@ export async function getProjectForPost(
   
   console.log(`Looking for project containing post ID: ${postId} (short ID: ${shortPostId})`);
   
-  // Buscar el proyecto que contiene este post
+  // Buscar el proyecto que contiene este post (solo entre los publicados)
   for (const project of projects) {
     if (!project.data.relatedPosts) continue
     
@@ -267,7 +269,7 @@ export async function getProjectForPost(
     }
   }
   
-  console.log(`Post ${postId} not found in any project`);
-  // Si no encontramos el post en ningún proyecto
+  console.log(`Post ${postId} not found in any published project`);
+  // Si no encontramos el post en ningún proyecto publicado
   return { project: null, index: -1, total: 0 }
 }
