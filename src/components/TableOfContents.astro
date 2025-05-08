@@ -254,4 +254,11 @@ function buildToc(headings: Heading[]): Heading[] {
   // Configurar al cargar la página y después de transiciones
   document.addEventListener('astro:page-load', setupToc)
   document.addEventListener('astro:after-swap', setupToc)
+  
+  // Optionally disable view transitions on slow connections
+  if (navigator.connection && 
+      (navigator.connection.saveData || 
+      (navigator.connection.effectiveType && navigator.connection.effectiveType.includes('2g')))) {
+    document.documentElement.style.setProperty('--animation-duration', '0s');
+  }
 </script>

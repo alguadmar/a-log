@@ -48,21 +48,13 @@ import { Icon } from 'astro-icon/components'
 </script>
 
 <script>
-  // Use a debounced version of the theme toggle to avoid rapid changes
-  function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  }
+  // Removed debounce - we want immediate response
 
   function handleToggleClick() {
     const element = document.documentElement
+    
+    // Bloquear cualquier transición mientras actualizamos el tema
+    element.classList.add('disable-transitions');
     
     // Simplificamos el toggle para hacerlo más directo y rápido
     const newTheme = element.classList.contains('dark') ? 'light' : 'dark';
@@ -93,6 +85,11 @@ import { Icon } from 'astro-icon/components'
       const iconFix = document.getElementById('theme-icons-fix');
       if (iconFix) iconFix.remove();
     }
+    
+    // Después de un mínimo timeout, permitir transiciones otra vez
+    requestAnimationFrame(() => {
+      element.classList.remove('disable-transitions');
+    });
   }
 
   // Usamos el handler directo sin debounce para mejorar la respuesta

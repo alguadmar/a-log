@@ -3,7 +3,7 @@ import { ScrollArea as ScrollAreaPrimitive } from 'radix-ui'
 
 import { cn } from '@/lib/utils'
 
-function ScrollArea({
+const ScrollArea = React.memo(function ScrollArea({
   className,
   children,
   ...props
@@ -24,7 +24,7 @@ function ScrollArea({
       <ScrollAreaPrimitive.Corner />
     </ScrollAreaPrimitive.Root>
   )
-}
+})
 
 function ScrollBar({
   className,

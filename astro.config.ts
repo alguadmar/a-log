@@ -26,6 +26,14 @@ export default defineConfig({
   build: {
     inlineStylesheets: 'auto',
   },
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'hover'
+  },
+  transitions: {
+    persist: ['header', '.theme-toggle'],
+    animation: 'fade'
+  },
   integrations: [
     expressiveCode({
       themes: ['github-light', 'github-dark'],

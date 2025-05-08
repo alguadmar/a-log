@@ -15,6 +15,19 @@ const { isWide = false } = Astro.props
   <Head>
     <!-- Preload critical assets -->
     <link rel="preload" href="/fonts/JetBrainsMono[wght].woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/GeistVF.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preconnect" href="https://a-log-production.up.railway.app" crossorigin>
+    <meta name="view-transition" content="same-origin">
+    
+    <!-- Optimización de CSS para navegadores antiguos -->
+    <style is:inline>
+      @supports not (contain: paint) {
+        /* Fallback para navegadores que no soportan view transitions */
+        .page-content { animation: fadeIn 0.15s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      }
+    </style>
+    
     <slot name="head" />
   </Head>
   <body>
@@ -23,9 +36,10 @@ const { isWide = false } = Astro.props
       <main class="grow">
         <div
           class={cn(
-            'mx-auto flex grow flex-col gap-y-6 px-4',
+            'mx-auto flex grow flex-col gap-y-6 px-4 page-content',
             !isWide && 'max-w-3xl',
           )}
+          transition:animate="fade"
         >
           <slot />
         </div>

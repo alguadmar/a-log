@@ -4,7 +4,9 @@
 
 /* Add transition for background and text colors */
 :root {
-  --transition-duration: 0.1s;
+  --transition-duration: 0.05s;
+  --animation-duration: 150ms;
+  --animation-timing: ease-out;
 }
 
 /* JetBrains Mono */
@@ -91,6 +93,36 @@
 }
 
 @layer base {
+  /* Fadein animation for view transitions */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @media (prefers-reduced-motion: no-preference) {
+    ::view-transition-group(root) {
+      animation-duration: 0.15s;
+    }
+    
+    ::view-transition-old(root) {
+      animation: 0.15s cubic-bezier(0.4, 0, 0.2, 1) both fade-out;
+    }
+    
+    ::view-transition-new(root) {
+      animation: 0.15s cubic-bezier(0.4, 0, 0.2, 1) both fade-in;
+    }
+  }
+
   html {
     @apply bg-background text-foreground font-sans;
     /* Add color-scheme to properly handle system colors */
