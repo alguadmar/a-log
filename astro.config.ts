@@ -74,6 +74,9 @@ export default defineConfig({
   ],
   vite: {
     plugins: [tailwindcss()],
+    server: {
+      allowedHosts: ['a-log-production.up.railway.app'],
+    },
   },
   server: {
     port: 1234,
