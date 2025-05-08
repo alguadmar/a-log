@@ -11,7 +11,7 @@ const blog = await getRecentPosts(SITE.featuredPostCount)
 ---
 
 <Layout>
-  <PageHead slot="head" title="Home" />
+  <PageHead slot="head" title="Inicio" />
   <section>
     <div class="rounded-lg border">
       <div class="flex flex-col space-y-1.5 p-6">
@@ -22,7 +22,7 @@ const blog = await getRecentPosts(SITE.featuredPostCount)
       </div>
       <div class="p-6 pt-0">
         <p class="text-muted-foreground mb-2 ">
-        Un archivo de pensamiento libre.</br>
+        Un archivo de escritura libre.</br>
         Una bitácora de aprendizaje en espiral. </br>
         Cada entrada es un registro vivo, </br>
         un ensayo de pensamiento sin condiciones, </br>
@@ -45,7 +45,7 @@ const blog = await getRecentPosts(SITE.featuredPostCount)
     </div>
   </section>
   <section class="flex flex-col gap-y-4">
-    <h2 class="text-2xl font-medium">Latest posts</h2>
+    <h2 class="text-2xl font-medium">Entradas recientes</h2>
     <ul class="flex flex-col gap-y-4">
       {
         blog.map((post) => (
@@ -60,7 +60,7 @@ const blog = await getRecentPosts(SITE.featuredPostCount)
         href="/blog"
         class={buttonVariants({ variant: 'ghost' }) + ' group'}
       >
-        See all posts <span
+        Ver todas las entradas <span
           class="ml-1.5 transition-transform group-hover:translate-x-1"
           >&rarr;</span
         >
