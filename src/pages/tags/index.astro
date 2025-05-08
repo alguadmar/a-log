@@ -20,19 +20,26 @@ const sortedTags = await getSortedTags()
       Explora posts y proyectos por etiquetas. Cada etiqueta muestra el número total de contenidos asociados.
     </p>
     
-    <div class="flex flex-wrap gap-2 mt-4">
-      {
-        sortedTags.map(({ tag, count }) => (
-          <Link
-            href={`/tags/${tag}`}
-            class={badgeVariants({ variant: 'secondary' })}
-          >
-            <Icon name="lucide:hash" class="size-3" />
-            {tag}
-            <span class="text-muted-foreground ml-1.5">({count})</span>
-          </Link>
-        ))
-      }
-    </div>
+    {sortedTags.length > 0 ? (
+      <div class="flex flex-wrap gap-2 mt-4">
+        {
+          sortedTags.map(({ tag, count }) => (
+            <Link
+              href={`/tags/${tag}`}
+              class={badgeVariants({ variant: 'secondary' })}
+            >
+              <Icon name="lucide:hash" class="size-3" />
+              {tag}
+              <span class="text-muted-foreground ml-1.5">({count})</span>
+            </Link>
+          ))
+        }
+      </div>
+    ) : (
+      <div class="mt-4 text-center py-6">
+        <p class="text-muted-foreground mb-2">No hay etiquetas disponibles actualmente.</p>
+        <p class="text-muted-foreground">Las etiquetas aparecerán cuando se añadan entradas o proyectos al sitio.</p>
+      </div>
+    )}
   </div>
 </Layout>

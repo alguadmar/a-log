@@ -1,7 +1,9 @@
 ---
 import BlogCard from '@/components/BlogCard.astro'
 import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import Link from '@/components/Link.astro'
 import PageHead from '@/components/PageHead.astro'
+import { buttonVariants } from '@/components/ui/button'
 import PaginationComponent from '@/components/ui/pagination'
 import { SITE } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
@@ -33,26 +35,36 @@ const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a))
   />
 
   <div class="flex min-h-[calc(100vh-18rem)] flex-col gap-y-8">
-    {
-      years.map((year) => (
-        <section class="flex flex-col gap-y-4">
-          <div class="font-medium">{year}</div>
-          <ul class="flex flex-col gap-4">
-            {postsByYear[year].map((post) => (
-              <li>
-                <BlogCard entry={post} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))
-    }
+    {years.length > 0 ? (
+      <>
+        {years.map((year) => (
+          <section class="flex flex-col gap-y-4">
+            <div class="font-medium">{year}</div>
+            <ul class="flex flex-col gap-4">
+              {postsByYear[year].map((post) => (
+                <li>
+                  <BlogCard entry={post} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+        
+        <PaginationComponent
+          currentPage={page.currentPage}
+          totalPages={page.lastPage}
+          baseUrl="/blog/"
+          client:load
+        />
+      </>
+    ) : (
+      <div class="text-center py-12">
+        <h2 class="text-xl font-medium mb-4">No hay entradas disponibles</h2>
+        <p class="text-muted-foreground mb-6">Aún no se ha publicado ninguna entrada en este blog.</p>
+        <Link href="/" class={buttonVariants({ variant: 'outline' })}>
+          Volver al inicio
+        </Link>
+      </div>
+    )}
   </div>
-
-  <PaginationComponent
-    currentPage={page.currentPage}
-    totalPages={page.lastPage}
-    baseUrl="/blog/"
-    client:load
-  />
 </Layout>

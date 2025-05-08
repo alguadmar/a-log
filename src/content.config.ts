@@ -33,8 +33,7 @@ const authors = defineCollection({
 
 const projects = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/projects' }),
-  schema: ({ image }) =>
-    z.object({
+  schema: z.object({
       name: z.string(),
       description: z.string(),
       tags: z.array(z.string()),
@@ -43,6 +42,7 @@ const projects = defineCollection({
       relatedPosts: z.array(z.string()).optional(), // IDs de los posts relacionados
       startDate: z.coerce.date().optional(),
       endDate: z.coerce.date().optional(),
+      draft: z.boolean().optional(),
     }),
 })
 

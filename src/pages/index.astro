@@ -46,25 +46,31 @@ const blog = await getRecentPosts(SITE.featuredPostCount)
   </section>
   <section class="flex flex-col gap-y-4">
     <h2 class="text-2xl font-medium">Entradas recientes</h2>
-    <ul class="flex flex-col gap-y-4">
-      {
-        blog.map((post) => (
-          <li>
-            <BlogCard entry={post} />
-          </li>
-        ))
-      }
-    </ul>
-    <div class="flex justify-center">
-      <Link
-        href="/blog"
-        class={buttonVariants({ variant: 'ghost' }) + ' group'}
-      >
-        Ver todas las entradas <span
-          class="ml-1.5 transition-transform group-hover:translate-x-1"
-          >&rarr;</span
-        >
-      </Link>
-    </div>
+    {blog.length > 0 ? (
+      <>
+        <ul class="flex flex-col gap-y-4">
+          {
+            blog.map((post) => (
+              <li>
+                <BlogCard entry={post} />
+              </li>
+            ))
+          }
+        </ul>
+        <div class="flex justify-center">
+          <Link
+            href="/blog"
+            class={buttonVariants({ variant: 'ghost' }) + ' group'}
+          >
+            Ver todas las entradas <span
+              class="ml-1.5 transition-transform group-hover:translate-x-1"
+              >&rarr;</span
+            >
+          </Link>
+        </div>
+      </>
+    ) : (
+      <p class="text-muted-foreground">No hay entradas disponibles aún. Pronto añadiré contenido.</p>
+    )}
   </section>
 </Layout>
