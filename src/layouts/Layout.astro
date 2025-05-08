@@ -14,7 +14,8 @@ const { isWide = false } = Astro.props
 <!doctype html>
 <html lang={SITE.locale} class="color-scheme-unset">
   <Head>
-    <!-- Preconectar con dominios utilizados -->
+    <!-- Preload crítico y preconectar con dominios -->
+    <link rel="preload" href="/fonts/JetBrainsMono[wght].woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preconnect" href="https://a-log-production.up.railway.app" crossorigin>
     
     <slot name="head" />

@@ -3,8 +3,8 @@ import { SITE } from '@/consts'
 import { ClientRouter } from 'astro:transitions'
 import Favicons from './Favicons.astro'
 
-// Variables para la carga eficiente de fuentes
-const fontUrls = [
+// Variables para las fuentes principales
+const fonts = [
   {
     url: '/fonts/JetBrainsMono[wght].woff2',
     type: 'font/woff2'
@@ -43,28 +43,11 @@ const fontUrls = [
       // Ajustar colores de fondo para evitar parpadeos
       document.documentElement.style.backgroundColor = isDark ? '#09090b' : '#ffffff';
       
-      // Cargar las fuentes de forma eficiente
-      document.documentElement.style.fontFamily = "system-ui, sans-serif";
-      
       // En cuanto el DOM esté listo, dejar que el CSS tome el control
       document.addEventListener('DOMContentLoaded', () => {
         document.documentElement.style.backgroundColor = '';
         if (document.body) document.body.style.backgroundColor = '';
         document.documentElement.classList.remove('color-scheme-unset');
-        
-        // Iniciar la carga de fuentes después del DOMContentLoaded
-        const fontLoader = document.createElement('script');
-        fontLoader.textContent = `
-          // Carga progresiva de fuentes para evitar advertencias de preload
-          (function() {
-            const fontLoader = document.createElement('style');
-            fontLoader.textContent = 
-              '@font-face { font-family: "JetBrains Mono"; src: url("/fonts/JetBrainsMono[wght].woff2") format("woff2-variations"); font-weight: 100 800; font-style: normal; font-display: swap; }' +
-              '@font-face { font-family: "JetBrains Mono"; src: url("/fonts/JetBrainsMono-Italic[wght].woff2") format("woff2-variations"); font-weight: 100 800; font-style: italic; font-display: swap; }';
-            document.head.appendChild(fontLoader);
-          })();
-        `;
-        document.head.appendChild(fontLoader);
       }, { once: true });
     })();
   </script>
