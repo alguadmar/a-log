@@ -8,6 +8,8 @@ import { Icon } from 'astro-icon/components'
 import { Image } from 'astro:assets'
 import type { CollectionEntry } from 'astro:content'
 import Link from './Link.astro'
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
 
 interface Props {
   entry: CollectionEntry<'blog'>
@@ -17,6 +19,22 @@ const { entry } = Astro.props
 const formattedDate = formatDate(entry.data.date)
 const readTime = readingTime(entry.body!)
 const authors = await parseAuthors(entry.data.authors ?? [])
+
+// Process image path if it's a relative path
+let imageData = entry.data.image
+if (imageData && typeof imageData === 'string' && imageData.startsWith('./')) {
+  const contentDir = entry.id.split('/').slice(0, -1).join('/')
+  const contentBasePath = path.join(process.cwd(), 'src/content/blog', contentDir)
+  
+  try {
+    // Import image directly using absolute path in site URL format
+    imageData = Astro.site 
+      ? new URL(`/src/content/blog/${contentDir}/${imageData.replace('./', '')}`, Astro.site)
+      : imageData
+  } catch (error) {
+    console.error(`Error processing image for entry ${entry.id}:`, error)
+  }
+}
 ---
 
 <div
@@ -30,7 +48,7 @@ const authors = await parseAuthors(entry.data.authors ?? [])
       <Link href={`/${entry.collection}/${entry.id}`}>
         <div class="relative h-48 w-full overflow-hidden rounded-md bg-muted sm:h-36 sm:w-[250px] sm:shrink-0">
           <Image
-            src={entry.data.image}
+            src={imageData || entry.data.image}
             alt={entry.data.title}
             width={250}
             height={150}

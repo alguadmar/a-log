@@ -14,13 +14,47 @@ import { formatDate, readingTime } from '@/lib/utils'
 import { Icon } from 'astro-icon/components'
 import { Image } from 'astro:assets'
 import { render } from 'astro:content'
+import { fileURLToPath } from 'node:url'
+import path from 'node:path'
+import fs from 'node:fs/promises'
 
 export async function getStaticPaths() {
   const posts = await getAllPosts()
-  return posts.map((post) => ({
-    params: { id: post.id },
-    props: post,
-  }))
+  
+  return posts.map((post) => {
+    // Get the directory containing the content file to properly resolve relative images
+    const contentDir = post.id.split('/').slice(0, -1).join('/')
+    const contentBasePath = path.join(process.cwd(), 'src/content/blog', contentDir)
+    
+    let imageData = post.data.image
+    
+    // Only process relative image paths
+    if (imageData && typeof imageData === 'string' && imageData.startsWith('./')) {
+      // Convert relative path to absolute during build time
+      const imagePath = path.join(contentBasePath, imageData.replace('./', ''))
+      
+      try {
+        // Import image directly using absolute path
+        imageData = Astro.site 
+          ? new URL(`/src/content/blog/${contentDir}/${imageData.replace('./', '')}`, Astro.site)
+          : imagePath
+      } catch (error) {
+        console.error(`Error processing image for post ${post.id}:`, error)
+      }
+    }
+    
+    // Return post with processed image path
+    return {
+      params: { id: post.id },
+      props: { 
+        ...post,
+        data: {
+          ...post.data,
+          image: imageData
+        }
+      },
+    }
+  })
 }
 
 const post = Astro.props
